@@ -14,4 +14,10 @@ def explore_data(df):
     
 explore_data(df)
 
-    
+def find_missing_values(df):
+    """Find and return the count of missing values in each column of the DataFrame."""
+    missing_values = df.isnull().sum()
+    return missing_values[missing_values > 0]
+
+missing_values = find_missing_values(df)
+print("Missing values in each column:\n", missing_values)
