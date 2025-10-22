@@ -11,6 +11,8 @@ def explore_data(df):
     print(df.describe())
     print(df.head())
     print(df.tail())
+    print("DataFrame Shape:", df.shape)
+    print("DataFrame Columns:", df.columns.tolist())
     
 explore_data(df)
 
