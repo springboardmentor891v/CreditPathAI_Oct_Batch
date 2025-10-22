@@ -1,0 +1,8 @@
+# Ignore datasets
+*.csv
+*.zip
+*.tar.gz
+venv/
+__pycache__/
+.ipynb_checkpoints/
+
