@@ -1,4 +1,6 @@
+import os
+import subprocess
 import pandas as pd
 import numpy as np
-
-print("Hello from the student branch!")
+import matplotlib.pyplot as plt
+import seaborn as sns
