@@ -1,29 +1,19 @@
 import pandas as pd
 
-# Using a sample open loan dataset
-url = "https://raw.githubusercontent.com/plotly/datasets/master/loan_data.csv"
+# Replace with your actual file path
+df = pd.read_csv("C:/Users/KAUSHIK/CreditPathAI_Oct_Batch/Loan_Default.csv")
 
-# Read the dataset
-df = pd.read_csv(url)
-
-# Display top and bottom rows
-print("First 5 rows of the dataset:")
+# Display first few rows
 print(df.head())
 
-print("\nLast 5 rows of the dataset:")
-print(df.tail())
+# Check shape (rows, columns)
+print(df.shape)
 
-# Show dataset shape
-print("\nShape of dataset:", df.shape)
-
-# Show info about columns
-print("\nDataset Info:")
+# Get info about columns and data types
 print(df.info())
 
-# Show descriptive statistics
-print("\nDescriptive Statistics:")
+# Quick summary statistics
 print(df.describe())
 
-# Example of using sum()
-print("\nSum of numeric columns:")
-print(df.sum())
+# Check if there are missing values
+print(df.isnull().sum())
