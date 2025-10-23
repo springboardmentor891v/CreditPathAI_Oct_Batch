@@ -30,3 +30,12 @@ print(df.info())
 
 print("\n--- DESCRIPTION ---")
 print(df.describe())
+
+print("\n--- TAIL ---")
+print(df.tail())
+
+print("\n--- OVERALL NULL VALUES ---")
+print(df.isnull())
+
+print("\n--- SUM OF NULL VALUES ---")
+print(df.isnull().sum())
