@@ -1,0 +1,253 @@
+
+--- FIRST 5 RECORDS ---
+      ID  year loan_limit             Gender approv_in_adv loan_type loan_purpose  ...    age submission_of_application        LTV  Region  Security_Type  Status  dtir1
+0  24890  2019         cf  Sex Not Available         nopre     type1           p1  ...  25-34                   to_inst  98.728814   south         direct       1   45.0
+1  24891  2019         cf               Male         nopre     type2           p1  ...  55-64                   to_inst        NaN   North         direct       1    NaN
+2  24892  2019         cf               Male           pre     type1           p1  ...  35-44                   to_inst  80.019685   south         direct       0   46.0
+3  24893  2019         cf               Male         nopre     type1           p4  ...  45-54                  not_inst  69.376900   North         direct       0   42.0
+4  24894  2019         cf              Joint           pre     type1           p1  ...  25-34                  not_inst  91.886544   North         direct       0   39.0
+
+[5 rows x 34 columns]
+
+--- LAST 5 RECORDS ---
+            ID  year loan_limit             Gender approv_in_adv loan_type loan_purpose  ...    age submission_of_application        LTV  Region  Security_Type  Status  dtir1
+148665  173555  2019         cf  Sex Not Available         nopre     type1           p3  ...  55-64                   to_inst  71.792763   south         direct       0   48.0
+148666  173556  2019         cf               Male         nopre     type1           p1  ...  25-34                  not_inst  74.428934   south         direct       0   15.0
+148667  173557  2019         cf               Male         nopre     type1           p4  ...  45-54                  not_inst  61.332418   North         direct       0   49.0
+148668  173558  2019         cf             Female         nopre     type1           p4  ...  55-64                   to_inst  70.683453   North         direct       0   29.0
+148669  173559  2019         cf             Female         nopre     type1           p3  ...  45-54                  not_inst  72.849462   North         direct       0   44.0
+
+[5 rows x 34 columns]
+
+--- SHAPE OF DATA (ROWS, COLUMNS) ---
+(148670, 34)
+
+--- COLUMN NAMES ---
+['ID', 'year', 'loan_limit', 'Gender', 'approv_in_adv', 'loan_type', 'loan_purpose', 'Credit_Worthiness', 'open_credit', 'business_or_commercial', 'loan_amount', 'rate_of_interest', 'Interest_rate_spread', 'Upfront_charges', 'term', 'Neg_ammortization', 'interest_only', 'lump_sum_payment', 'property_value', 'construction_type', 'occupancy_type', 'Secured_by', 'total_units', 'income', 'credit_type', 'Credit_Score', 'co-applicant_credit_type', 'age', 'submission_of_application', 'LTV', 'Region', 'Security_Type', 'Status', 'dtir1']
+
+--- DATA TYPES ---
+ID                             int64
+year                           int64
+loan_limit                    object
+Gender                        object
+approv_in_adv                 object
+loan_type                     object
+loan_purpose                  object
+Credit_Worthiness             object
+open_credit                   object
+business_or_commercial        object
+loan_amount                    int64
+rate_of_interest             float64
+Interest_rate_spread         float64
+Upfront_charges              float64
+term                         float64
+Neg_ammortization             object
+interest_only                 object
+lump_sum_payment              object
+property_value               float64
+construction_type             object
+occupancy_type                object
+Secured_by                    object
+total_units                   object
+income                       float64
+credit_type                   object
+Credit_Score                   int64
+co-applicant_credit_type      object
+age                           object
+submission_of_application     object
+LTV                          float64
+Region                        object
+Security_Type                 object
+Status                         int64
+dtir1                        float64
+dtype: object
+
+--- STATISTICAL SUMMARY ---
+                   ID      year loan_limit  Gender approv_in_adv loan_type  ... submission_of_application            LTV  Region Security_Type         Status          dtir1
+count   148670.000000  148670.0     145326  148670        147762    148670  ...                    148470  133572.000000  148670        148670  148670.000000  124549.000000
+unique            NaN       NaN          2       4             2         3  ...                         2            NaN       4             2            NaN            NaN
+top               NaN       NaN         cf    Male         nopre     type1  ...                   to_inst            NaN   North        direct            NaN            NaN
+freq              NaN       NaN     135348   42346        124621    113173  ...                     95814            NaN   74722        148637            NaN            NaN
+mean     99224.500000    2019.0        NaN     NaN           NaN       NaN  ...                       NaN      72.746457     NaN           NaN       0.246445      37.732932
+std      42917.476598       0.0        NaN     NaN           NaN       NaN  ...                       NaN      39.967603     NaN           NaN       0.430942      10.545435
+min      24890.000000    2019.0        NaN     NaN           NaN       NaN  ...                       NaN       0.967478     NaN           NaN       0.000000       5.000000
+25%      62057.250000    2019.0        NaN     NaN           NaN       NaN  ...                       NaN      60.474860     NaN           NaN       0.000000      31.000000
+50%      99224.500000    2019.0        NaN     NaN           NaN       NaN  ...                       NaN      75.135870     NaN           NaN       0.000000      39.000000
+75%     136391.750000    2019.0        NaN     NaN           NaN       NaN  ...                       NaN      86.184211     NaN           NaN       0.000000      45.000000
+max     173559.000000    2019.0        NaN     NaN           NaN       NaN  ...                       NaN    7831.250000     NaN           NaN       1.000000      61.000000
+
+[11 rows x 34 columns]
+
+--- DATAFRAME INFO ---
+<class 'pandas.core.frame.DataFrame'>
+RangeIndex: 148670 entries, 0 to 148669
+Data columns (total 34 columns):
+ #   Column                     Non-Null Count   Dtype  
+---  ------                     --------------   -----  
+ 0   ID                         148670 non-null  int64  
+ 1   year                       148670 non-null  int64  
+ 2   loan_limit                 145326 non-null  object 
+ 3   Gender                     148670 non-null  object 
+ 4   approv_in_adv              147762 non-null  object 
+ 5   loan_type                  148670 non-null  object 
+ 6   loan_purpose               148536 non-null  object 
+ 7   Credit_Worthiness          148670 non-null  object 
+ 8   open_credit                148670 non-null  object 
+ 9   business_or_commercial     148670 non-null  object 
+ 10  loan_amount                148670 non-null  int64  
+ 11  rate_of_interest           112231 non-null  float64
+ 12  Interest_rate_spread       112031 non-null  float64
+ 13  Upfront_charges            109028 non-null  float64
+ 14  term                       148629 non-null  float64
+ 15  Neg_ammortization          148549 non-null  object 
+ 16  interest_only              148670 non-null  object 
+ 17  lump_sum_payment           148670 non-null  object 
+ 18  property_value             133572 non-null  float64
+ 19  construction_type          148670 non-null  object 
+ 20  occupancy_type             148670 non-null  object 
+ 21  Secured_by                 148670 non-null  object 
+ 22  total_units                148670 non-null  object 
+ 23  income                     139520 non-null  float64
+ 24  credit_type                148670 non-null  object 
+ 25  Credit_Score               148670 non-null  int64  
+ 26  co-applicant_credit_type   148670 non-null  object 
+ 27  age                        148470 non-null  object 
+ 28  submission_of_application  148470 non-null  object 
+ 29  LTV                        133572 non-null  float64
+ 30  Region                     148670 non-null  object 
+ 31  Security_Type              148670 non-null  object 
+ 32  Status                     148670 non-null  int64  
+ 33  dtir1                      124549 non-null  float64
+dtypes: float64(8), int64(5), object(21)
+memory usage: 38.6+ MB
+None
+
+Missing values per column:
+ID                               0
+year                             0
+loan_limit                    3344
+Gender                           0
+approv_in_adv                  908
+loan_type                        0
+loan_purpose                   134
+Credit_Worthiness                0
+open_credit                      0
+business_or_commercial           0
+loan_amount                      0
+rate_of_interest             36439
+Interest_rate_spread         36639
+Upfront_charges              39642
+term                            41
+Neg_ammortization              121
+interest_only                    0
+lump_sum_payment                 0
+property_value               15098
+construction_type                0
+occupancy_type                   0
+Secured_by                       0
+total_units                      0
+income                        9150
+credit_type                      0
+Credit_Score                     0
+co-applicant_credit_type         0
+age                            200
+submission_of_application      200
+LTV                          15098
+Region                           0
+Security_Type                    0
+Status                           0
+dtir1                        24121
+dtype: int64
+
+Duplicate rows in dataset: 0
+
+Columns with missing values:
+ loan_limit                    3344
+approv_in_adv                  908
+loan_purpose                   134
+rate_of_interest             36439
+Interest_rate_spread         36639
+Upfront_charges              39642
+term                            41
+Neg_ammortization              121
+property_value               15098
+income                        9150
+age                            200
+submission_of_application      200
+LTV                          15098
+dtir1                        24121
+dtype: int64
+
+Rows containing missing values:
+ 0         3
+1         6
+3         1
+7         1
+10        3
+         ..
+148651    3
+148652    6
+148658    6
+148661    5
+148663    6
+Length: 50483, dtype: int64
+
+After dropping missing rows: (98187, 34)
+After dropping missing columns: (148670, 20)
+
+Value counts for 'age':
+ age
+45-54    34720
+35-44    32818
+55-64    32534
+65-74    20744
+25-34    19142
+>74       7175
+<25       1337
+NaN        200
+Name: count, dtype: int64
+
+Value counts for 'loan_amount':
+ loan_amount
+206500     4610
+256500     4079
+156500     3967
+226500     3944
+486500     3819
+           ... 
+2206500       1
+1746500       1
+2396500       1
+3576500       1
+1956500       1
+Name: count, Length: 211, dtype: int64
+
+Value counts for 'loan_limit':
+ loan_limit
+cf     135348
+ncf      9978
+NaN      3344
+Name: count, dtype: int64
+
+--- UPDATED DATA TYPES ---
+loan_amount           float64
+rate_of_interest      float64
+term                 category
+Credit_Score          float64
+income                float64
+loan_purpose         category
+Credit_Worthiness    category
+Gender               category
+Status               category
+age                   float64
+LTV                   float64
+dtir1                 float64
+dtype: object
+
+--- CLEANED DATA SAMPLE ---
+   loan_amount  rate_of_interest   term  Credit_Score   income loan_purpose Credit_Worthiness             Gender Status   age        LTV  dtir1
+0     116500.0               NaN  360.0         758.0   1740.0           p1                l1  Sex Not Available      1  25.0  98.728814   45.0
+1     206500.0               NaN  360.0         552.0   4980.0           p1                l1               Male      1  55.0        NaN    NaN
+2     406500.0              4.56  360.0         834.0   9480.0           p1                l1               Male      0  35.0  80.019685   46.0
+3     456500.0              4.25  360.0         587.0  11880.0           p4                l1               Male      0  45.0  69.376900   42.0
+4     696500.0              4.00  360.0         602.0  10440.0           p1                l1              Joint      0  25.0  91.886544   39.0
