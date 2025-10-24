@@ -1,0 +1,18 @@
+Schema: A schema is like a blueprint or plan that shows how things are organized. What kind of data is stored, and how different pieces connect. It helps you know where to find things. A schema is a plan that shows how things are arranged or organized. It helps make sense of complex stuff.
+
+A schema is a structured plan that defines how data is organized — like naming columns, setting data types (e.g., number, text, date), and describing relationships between parts of the dataset.
+
+To create a schema for a dataset:
+
+1. Look at the data and identify key fields (like name, age, price).
+2. Assign data types to each field (e.g., string, integer, boolean).
+3. Define relationships if needed (e.g., linking customer ID to orders).
+4. Check for missing or inconsistent values to clean and validate the schema.
+
+
+Data profiling tools: analyze data to assess quality, structure, and content, identifying anomalies, inconsistencies, and relationships. 
+these tools are important for data management, ensuring data accuracy, and enabling informed decision-making. 
+Key functionalities: 
+Structure analysis
+Content analysis
+Relationship discovery
