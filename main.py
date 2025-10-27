@@ -11,3 +11,4 @@ print(df.describe())
 # print(df.isnull().sum())
 # lpc = df['loan_limit'].value_counts()
 # print(lpc)
+
