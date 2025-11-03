@@ -1,6 +1,6 @@
 ## **Loan Default Prediction Dataset**
 
-**Project Goal:**  
+**Goal:**  
 To develop a machine learning model that predicts the risk of a borrower defaulting on a loan and recommends personalized recovery actions.
 
 **About Dataset:**  
