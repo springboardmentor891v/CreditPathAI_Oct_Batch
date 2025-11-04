@@ -23,7 +23,7 @@ plt.xlabel("Default (0 = No, 1 = Yes)")
 plt.ylabel("Count")
 plt.show()
 
-'''
+
 numeric_cols = [
     'Age', 'Income', 'LoanAmount', 'CreditScore',
     'MonthsEmployed', 'NumCreditLines', 'InterestRate', 'LoanTerm', 'DTIRatio'
@@ -110,7 +110,7 @@ if 'Default' in corr_matrix.columns:
 else:
     print("'Default' column not found in numeric columns.")
 
-'''
+
 X = df.drop(columns=['Default', 'LoanID'])  
 y = df['Default']
 
