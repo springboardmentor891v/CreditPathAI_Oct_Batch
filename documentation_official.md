@@ -141,7 +141,7 @@ Numerical features were scaled using **`StandardScaler`** from Scikit-learn to n
 
 <div align="center">
 
-### ✨ *Prepared with precision for the Loan Default Prediction ML Pipeline.*  
-**© 2025 Loan Risk Intelligence Initiative**
+### ✨ *documentation for the Loan Default Prediction ML Pipeline.*  
+**© creditpath AI loan default prediction**
 
 </div>
