@@ -1,0 +1,27 @@
+ML VS TRADITIONAL PROGRAMMING
+Traditional programming = you code the logic.
+Machine learning = the computer learns the logic from data.
+1. In traditional programming, rules and logic are explicitly written by the programmer.
+2. In machine learning, the computer learns patterns and rules automatically from data.
+3. Traditional programming uses data + rules → output, while ML uses data + output → model (rules).
+4 .Traditional methods work well for structured and predictable problems.
+5. Machine learning is better for complex or data-driven problems like image recognition or spam detection.
+6. Traditional programs give fixed and exact results, whereas ML gives probabilistic and adaptive predictions.
+In short, traditional programming is manual rule-based, while machine learning is data-driven and self-learning.
+
+  TYPES OF ML:
+1. Supervised Learning:
+Learns from labeled data (input–output pairs).
+Uses: Spam detection, price prediction, sentiment analysis.
+2. Unsupervised Learning:
+Learns from unlabeled data to find patterns or groups.
+Uses: Customer segmentation, recommendation systems.
+3. Semi-Supervised Learning:
+Uses both labeled and unlabeled data.
+Uses: Medical image analysis, web content classification.
+4. Reinforcement Learning:
+Learns by trial and error using rewards or penalties.
+Uses: Self-driving cars, robotics, game AI.
+
+
+
