@@ -2,7 +2,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 # Load the dataset
-df = pd.read_csv("C:/Users/KAUSHIK/CreditPathAI_Oct_Batch/Loan_Default.csv")
+df = pd.read_csv('Loan_Default.csv')
 
 print("First 5 rows:\n", df.head())
 print("\nLast 5 rows:\n", df.tail())
