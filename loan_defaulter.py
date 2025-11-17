@@ -138,4 +138,63 @@ X_test_scaled = scaler.transform(X_test)
 print("Scaling complete")
 print("X_train_scaled shape:", X_train_scaled.shape)
 print("X_test_scaled shape:", X_test_scaled.shape)
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import (
+    accuracy_score, precision_score, recall_score, f1_score,
+    classification_report, confusion_matrix, roc_auc_score, roc_curve
+)
+import joblib
 
+X = df.drop(columns=['Default', 'LoanID'])
+y = df['Default']
+print("Features shape:", X.shape)
+print("Target shape:", y.shape)
+
+X = pd.get_dummies(X, drop_first=True)
+print("After encoding, shape of X:", X.shape)
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42, stratify=y
+)
+print("Training shape:", X_train.shape, "Testing shape:", X_test.shape)
+
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+print("Scaling complete.")
+
+model = RandomForestClassifier(n_estimators=200, random_state=42)
+model.fit(X_train_scaled, y_train)
+
+y_pred = model.predict(X_test_scaled)
+y_prob = model.predict_proba(X_test_scaled)[:, 1]
+
+print("Accuracy:", accuracy_score(y_test, y_pred))
+print("Precision:", precision_score(y_test, y_pred))
+print("Recall:", recall_score(y_test, y_pred))
+print("F1 Score:", f1_score(y_test, y_pred))
+print("ROC AUC:", roc_auc_score(y_test, y_prob))
+
+print("\nClassification Report:\n", classification_report(y_test, y_pred))
+
+cm = confusion_matrix(y_test, y_pred)
+plt.figure(figsize=(6, 5))
+sns.heatmap(cm, annot=True, fmt='d', cmap='Blues')
+plt.title("Confusion Matrix")
+plt.xlabel("Predicted")
+plt.ylabel("Actual")
+plt.show()
+
+importances = model.feature_importances_
+feature_names = X.columns
+indices = np.argsort(importances)[::-1][:15]
+plt.figure(figsize=(10, 8))
+sns.barplot(x=importances[indices], y=feature_names[indices], palette='viridis')
+plt.title("Top 15 Feature Importances")
+plt.show()
+
+joblib.dump(scaler, "scaler.joblib")
+joblib.dump(model, "loan_default_rf_model.joblib")
+print("Scaler and model saved.")
