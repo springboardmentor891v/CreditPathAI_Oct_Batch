@@ -310,3 +310,278 @@ def export_summary_statistics(df, numeric_file='numeric_summary.csv', categorica
     categorical_stats.to_csv(categorical_file)
     print(f" Summary statistics exported: {numeric_file}, {categorical_file}")
 export_summary_statistics(df)
+
+
+
+
+'''MODEL TRAINING & EVALUATION'''
+
+
+
+#train test split
+from sklearn.model_selection import train_test_split    
+X = df.drop('Status', axis=1)
+y = df['Status']
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
+print("Train shape:", X_train.shape, "Test shape:", X_test.shape)
+
+# Save train and test sets
+def save_train_test_sets(X_train, X_test, y_train, y_test, prefix='loan_default'):
+    """Save train and test sets to CSV files."""
+    train = pd.concat([X_train, y_train], axis=1)
+    test = pd.concat([X_test, y_test], axis=1)
+    train.to_csv(f"{prefix}_train.csv", index=False)
+    test.to_csv(f"{prefix}_test.csv", index=False)
+    print(f" Train and test sets saved: {prefix}_train.csv, {prefix}_test.csv") 
+save_train_test_sets(X_train, X_test, y_train, y_test)
+
+
+
+#train linear regression model as a test
+from sklearn.linear_model import LinearRegression
+def train_linear_regression(X_train, y_train, X_test, y_test):
+    """Train and evaluate a linear regression model."""
+    model = LinearRegression()
+    model.fit(X_train, y_train)
+    train_score = model.score(X_train, y_train)
+    test_score = model.score(X_test, y_test)
+    print(f" Linear Regression Train R^2: {train_score:.4f}, Test R^2: {test_score:.4f}")
+train_linear_regression(X_train, y_train, X_test, y_test)
+
+
+#train logistic regression model as a test
+from sklearn.linear_model import LogisticRegression
+def train_logistic_regression(X_train, y_train, X_test, y_test):
+    """Train and evaluate a logistic regression model."""
+    model = LogisticRegression(max_iter=1000)
+    model.fit(X_train, y_train)
+    train_score = model.score(X_train, y_train)
+    test_score = model.score(X_test, y_test)
+    print(f" Logistic Regression Train Accuracy: {train_score:.4f}, Test Accuracy: {test_score:.4f}")
+train_logistic_regression(X_train, y_train, X_test, y_test)
+
+
+#train decision tree model as a test
+from sklearn.tree import DecisionTreeClassifier
+def train_decision_tree(X_train, y_train, X_test, y_test):
+    """Train and evaluate a decision tree classifier."""
+    model = DecisionTreeClassifier(random_state=42)
+    model.fit(X_train, y_train)
+    train_score = model.score(X_train, y_train)
+    test_score = model.score(X_test, y_test)
+    print(f" Decision Tree Train Accuracy: {train_score:.4f}, Test Accuracy: {test_score:.4f}")
+train_decision_tree(X_train, y_train, X_test, y_test)
+
+
+#train random forest model as a test
+from sklearn.ensemble import RandomForestClassifier 
+def train_random_forest(X_train, y_train, X_test, y_test):
+    """Train and evaluate a random forest classifier."""
+    model = RandomForestClassifier(n_estimators=100, random_state=42)
+    model.fit(X_train, y_train)
+    train_score = model.score(X_train, y_train)
+    test_score = model.score(X_test, y_test)
+    print(f" Random Forest Train Accuracy: {train_score:.4f}, Test Accuracy: {test_score:.4f}")
+train_random_forest(X_train, y_train, X_test, y_test)
+
+
+#hyperparameter tuning with grid search for random forest
+from sklearn.model_selection import GridSearchCV    
+def hyperparameter_tuning_rf(X_train, y_train):
+    """Perform hyperparameter tuning for Random Forest using GridSearchCV."""
+    param_grid = {
+        'n_estimators': [50, 100, 200],
+        'max_depth': [None, 10, 20],
+        'min_samples_split': [2, 5, 10]
+    }
+    rf = RandomForestClassifier(random_state=42)
+    grid_search = GridSearchCV(estimator=rf, param_grid=param_grid, cv=5, n_jobs=-1, scoring='accuracy')
+    grid_search.fit(X_train, y_train)
+    print(" Best parameters found:", grid_search.best_params_)
+    print(" Best cross-validation accuracy:", grid_search.best_score_)
+hyperparameter_tuning_rf(X_train, y_train)
+
+
+
+# train knn model as a test
+from sklearn.neighbors import KNeighborsClassifier
+def train_knn(X_train, y_train, X_test, y_test, n_neighbors=5):
+    """Train and evaluate a K-Nearest Neighbors classifier."""
+    model = KNeighborsClassifier(n_neighbors=n_neighbors)
+    model.fit(X_train, y_train)
+    train_score = model.score(X_train, y_train)
+    test_score = model.score(X_test, y_test)
+    print(f" KNN (k={n_neighbors}) Train Accuracy: {train_score:.4f}, Test Accuracy: {test_score:.4f}")
+train_knn(X_train, y_train, X_test, y_test, n_neighbors=5)
+
+# train naive bayes model as a test
+from sklearn.naive_bayes import GaussianNB
+def train_naive_bayes(X_train, y_train, X_test, y_test):
+    """Train and evaluate a Gaussian Naive Bayes classifier."""
+    model = GaussianNB()
+    model.fit(X_train, y_train)
+    train_score = model.score(X_train, y_train)
+    test_score = model.score(X_test, y_test)
+    print(f" Naive Bayes Train Accuracy: {train_score:.4f}, Test Accuracy: {test_score:.4f}")
+train_naive_bayes(X_train, y_train, X_test, y_test)
+
+
+# train svm model as a test
+from sklearn.svm import SVC
+def train_svm(X_train, y_train, X_test, y_test):
+    """Train and evaluate a Support Vector Machine classifier."""
+    model = SVC(random_state=42)
+    model.fit(X_train, y_train)
+    train_score = model.score(X_train, y_train)
+    test_score = model.score(X_test, y_test)
+    print(f" SVM Train Accuracy: {train_score:.4f}, Test Accuracy: {test_score:.4f}")
+train_svm(X_train, y_train, X_test, y_test)
+
+
+
+
+
+#handle class imbalance with SMOTE  
+from imblearn.over_sampling import SMOTE
+def apply_smote(X_train, y_train):
+    """Apply SMOTE to balance the training dataset."""
+    smote = SMOTE(random_state=42)
+    X_res, y_res = smote.fit_resample(X_train, y_train)
+    print(" After SMOTE, class distribution:\n", pd.Series(y_res).value_counts())
+    return X_res, y_res
+X_train, y_train = apply_smote(X_train, y_train)
+
+#train balanced random forest model as a test
+from imblearn.ensemble import BalancedRandomForestClassifier
+from imblearn.ensemble import EasyEnsembleClassifier
+def train_balanced_random_forest(X_train, y_train, X_test, y_test):
+    """Train and evaluate a Balanced Random Forest classifier."""
+    model = BalancedRandomForestClassifier(n_estimators=100, random_state=42)
+    model.fit(X_train, y_train)
+    train_score = model.score(X_train, y_train)
+    test_score = model.score(X_test, y_test)
+    print(f" Balanced Random Forest Train Accuracy: {train_score:.4f}, Test Accuracy: {test_score:.4f}")
+train_balanced_random_forest(X_train, y_train, X_test, y_test)
+
+
+
+
+
+# train xgboost model as a test
+import xgboost as xgb
+def train_xgboost(X_train, y_train, X_test, y_test):
+    """Train and evaluate an XGBoost classifier."""
+    model = xgb.XGBClassifier(use_label_encoder=False, eval_metric='logloss', random_state=42)
+    model.fit(X_train, y_train)
+    train_score = model.score(X_train, y_train)
+    test_score = model.score(X_test, y_test)
+    print(f" XGBoost Train Accuracy: {train_score:.4f}, Test Accuracy: {test_score:.4f}")
+train_xgboost(X_train, y_train, X_test, y_test)
+
+#train catboost model as a test
+from catboost import CatBoostClassifier
+def train_catboost(X_train, y_train, X_test, y_test):   
+    """Train and evaluate a CatBoost classifier."""
+    model = CatBoostClassifier(verbose=0, random_state=42)
+    model.fit(X_train, y_train)
+    train_score = model.score(X_train, y_train)
+    test_score = model.score(X_test, y_test)
+    print(f" CatBoost Train Accuracy: {train_score:.4f}, Test Accuracy: {test_score:.4f}")
+train_catboost(X_train, y_train, X_test, y_test)
+
+
+#train lightgbm model as a test
+import lightgbm as lgb  
+def train_lightgbm(X_train, y_train, X_test, y_test):
+    """Train and evaluate a LightGBM classifier."""
+    model = lgb.LGBMClassifier(random_state=42)
+    model.fit(X_train, y_train)
+    train_score = model.score(X_train, y_train)
+    test_score = model.score(X_test, y_test)
+    print(f" LightGBM Train Accuracy: {train_score:.4f}, Test Accuracy: {test_score:.4f}")
+train_lightgbm(X_train, y_train, X_test, y_test)
+
+
+
+
+
+
+#train ensemble model as a test
+from sklearn.ensemble import VotingClassifier
+def train_ensemble_model(X_train, y_train, X_test, y_test):
+    """Train and evaluate an ensemble voting classifier."""
+    model1 = LogisticRegression(max_iter=1000)
+    model2 = DecisionTreeClassifier(random_state=42)
+    model3 = RandomForestClassifier(n_estimators=100, random_state=42)
+    ensemble = VotingClassifier(estimators=[
+        ('lr', model1),
+        ('dt', model2),
+        ('rf', model3)
+    ], voting='hard')
+    ensemble.fit(X_train, y_train)
+    train_score = ensemble.score(X_train, y_train)
+    test_score = ensemble.score(X_test, y_test)
+    print(f" Ensemble Model Train Accuracy: {train_score:.4f}, Test Accuracy: {test_score:.4f}")
+train_ensemble_model(X_train, y_train, X_test, y_test)
+
+#train stacking model as a test
+from sklearn.ensemble import StackingClassifier
+def train_stacking_model(X_train, y_train, X_test, y_test):
+    """Train and evaluate a stacking classifier."""
+    estimators = [
+        ('lr', LogisticRegression(max_iter=1000)),
+        ('dt', DecisionTreeClassifier(random_state=42)),
+        ('rf', RandomForestClassifier(n_estimators=100, random_state=42))
+    ]
+    stacking = StackingClassifier(estimators=estimators, final_estimator=LogisticRegression(), cv=5)
+    stacking.fit(X_train, y_train)
+    train_score = stacking.score(X_train, y_train)
+    test_score = stacking.score(X_test, y_test)
+    print(f" Stacking Model Train Accuracy: {train_score:.4f}, Test Accuracy: {test_score:.4f}")
+train_stacking_model(X_train, y_train, X_test, y_test)
+
+#train bagging model as a test
+from sklearn.ensemble import BaggingClassifier  
+def train_bagging_model(X_train, y_train, X_test, y_test):
+    """Train and evaluate a bagging classifier."""
+    base_model = DecisionTreeClassifier(random_state=42)
+    bagging = BaggingClassifier(base_estimator=base_model, n_estimators=50, random_state=42)
+    bagging.fit(X_train, y_train)
+    train_score = bagging.score(X_train, y_train)
+    test_score = bagging.score(X_test, y_test)
+    print(f" Bagging Model Train Accuracy: {train_score:.4f}, Test Accuracy: {test_score:.4f}")
+train_bagging_model(X_train, y_train, X_test, y_test)
+
+
+
+
+
+
+
+#train mlp model as a test
+from sklearn.neural_network import MLPClassifier
+def train_mlp(X_train, y_train, X_test, y_test):
+    """Train and evaluate a Multi-Layer Perceptron classifier."""
+    model = MLPClassifier(hidden_layer_sizes=(100, ), max_iter=300, random_state=42)
+    model.fit(X_train, y_train)
+    train_score = model.score(X_train, y_train)
+    test_score = model.score(X_test, y_test)
+    print(f" MLP Classifier Train Accuracy: {train_score:.4f}, Test Accuracy: {test_score:.4f}")
+train_mlp(X_train, y_train, X_test, y_test)
+
+#train simple neural network model as a test
+import tensorflow as tf
+def train_simple_nn(X_train, y_train, X_test, y_test):
+    """Train and evaluate a simple neural network using TensorFlow/Keras."""
+    model = tf.keras.Sequential([
+        tf.keras.layers.Dense(64, activation='relu', input_shape=(X_train.shape[1],)),
+        tf.keras.layers.Dense(32, activation='relu'),
+        tf.keras.layers.Dense(1, activation='sigmoid')
+    ])
+    model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+    model.fit(X_train, y_train, epochs=20, batch_size=32, verbose=0)
+    train_loss, train_acc = model.evaluate(X_train, y_train, verbose=0)
+    test_loss, test_acc = model.evaluate(X_test, y_test, verbose=0)
+    print(f" Simple NN Train Accuracy: {train_acc:.4f}, Test Accuracy: {test_acc:.4f}")
+train_simple_nn(X_train, y_train, X_test, y_test)
+
