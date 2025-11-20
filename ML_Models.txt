@@ -1,0 +1,31 @@
+1. Logistic Regression:
+It is a widely used supervised machine learning algorithm primarily employed for binary classification tasks.
+Binary Classification: It is designed for problems where the target variable has two distinct outcomes.
+Sigmoid Function: The core of logistic regression is the sigmoid (or logistic) function, which transforms the linear output of a model into a probability value between 0 and 1.
+
+2. Naive Baye's: 
+It is a family of supervised machine learning algorithms used for classification tasks. It is based on Bayes' Theorem and operates under a "naive" assumption of conditional independence between features. 
+
+The Naive Bayes algorithm works by:
+Calculating Prior Probabilities: Determining the probability of each class occurring in the training data.
+Calculating Likelihoods: For each feature and each class, calculating the probability of observing that feature value given that the data point belongs to that class.
+Applying Bayes' Theorem: For a new, unseen data point, it calculates the posterior probability of each class using Bayes' Theorem, effectively combining the prior probabilities and likelihoods.
+Classification: The data point is assigned to the class with the highest posterior probability.
+
+3. Decision Tree:
+A decision tree is a flowchart-like diagram used for decision-making and machine learning that maps out a series of possible actions and their consequences. It is a tree-like structure that starts with a single root node and branches out into internal or decision nodes, which represent tests on features, and leaf nodes, which represent the final outcomes or predictions. 
+
+4. Support Vector Machine (SVM):
+It is a supervised machine learning algorithm used for both classification and regression tasks. It works by finding the optimal hyperplane that best separates data points of different classes, maximizing the margin (distance) between the hyperplane and the nearest data points.
+These nearest data points are called support vectors and are crucial for defining the decision boundary.
+
+5. Random Forest:
+It is a widely used and powerful ensemble learning algorithm in machine learning, capable of handling both classification and regression tasks. It operates by constructing a "forest" of multiple decision trees during training and outputting the mode of the classes (for classification) or the mean prediction (for regression) of the individual trees.
+
+6. XGBoost:
+It stands for eXtreme Gradient Boosting, is an open-source machine learning library and a highly optimized implementation of gradient boosted decision trees. It is a powerful and popular algorithm used for both classification and regression tasks, known for its speed, efficiency, and performance on structured or tabular data.
+
+7. K-Nearest Neighbors (KNN):
+It is a non-parametric, supervised machine learning algorithm used for both classification and regression tasks. It is considered a "lazy learner" because it does not build a model during the training phase, but rather stores the entire training dataset. The learning, or prediction, occurs during the testing phase. 
+
+
