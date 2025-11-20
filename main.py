@@ -2,21 +2,25 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
+import plotly.express as px
 
-# 1️ Load raw dataset
-df = pd.read_csv("C:/Users/JEEVAN REDDY/OneDrive/Desktop/CreditPathAI_SpringBoard/Loan_Default.csv")
+from google.colab import drive
+drive.mount('/content/drive')
 
-# 2️ Explore data
-def explore_data(df):
-    """Explore the DataFrame by displaying basic information and statistics."""
-    print(df.info())
-    print(df.describe())
-    print(df.head())
-    print(df.tail())
-    print("DataFrame Shape:", df.shape)
-    print("DataFrame Columns:", df.columns.tolist())
+# load dataset
+df = pd.read_csv('/content/drive/MyDrive/Colab Notebooks/Loan_Default.csv')
 
-explore_data(df)
+print(df.info())
+
+print(df.describe())
+
+print(df.head())
+
+print(df.tail())
+
+print("DataFrame Shape:", df.shape)
+
+print("DataFrame Columns:", df.columns.tolist())
 
 # 3️ Missing value inspection & filling
 def find_missing_values(df):
@@ -32,10 +36,9 @@ def plot_missing_values_heatmap(df):
     sns.heatmap(df.isnull(), cbar=False, yticklabels=False, cmap='viridis')
     plt.title('Missing Values Heatmap')
     plt.tight_layout()
-    plt.show()  
+    plt.show()
 plot_missing_values_heatmap(df)
 
-# 3.2 Fill missing values
 def fill_missing_values(df):
     """Fill missing values with median for numeric and mode for categorical."""
     for col in df.columns:
@@ -44,6 +47,7 @@ def fill_missing_values(df):
         else:
             fill_val = df[col].median()
         df[col] = df[col].fillna(fill_val)
+
     return df
 
 df = fill_missing_values(df)
@@ -127,13 +131,13 @@ def save_cleaned_data(df, filepath):
     df.to_csv(filepath, index=False)
     print(f" Cleaned data saved to: {filepath}")
 
-save_cleaned_data(df, "C:/Users/JEEVAN REDDY/OneDrive/Desktop/CreditPathAI_SpringBoard/Cleaned_Loan_Default.csv")
+save_cleaned_data(df, "/content/drive/MyDrive/Colab Notebooks/Cleaned_Loan_Default.csv")
 
 # 11 Reload cleaned data
 def load_cleaned_data(filepath):
     return pd.read_csv(filepath)
 
-df = load_cleaned_data("C:/Users/JEEVAN REDDY/OneDrive/Desktop/CreditPathAI_SpringBoard/Cleaned_Loan_Default.csv")
+df = load_cleaned_data("/content/drive/MyDrive/Colab Notebooks/Cleaned_Loan_Default.csv")
 
 # 12 Analyze cleaned data
 def analyze_data(df):
@@ -144,7 +148,6 @@ def analyze_data(df):
 
 analyze_data(df)
 
-#12.1
 # Load RAW once
 df_raw = pd.read_csv('/content/drive/MyDrive/Colab Notebooks/Loan_Default.csv')
 
@@ -167,10 +170,6 @@ df_clean = fill_missing_values(df_raw.copy())
 # AFTER imputation
 plot_missing_values_heatmap(df_clean, title='Missing (AFTER fill)')
 
-
-
-# Visualize cleaned data
-
 # 13 Numeric Summarystatistics
 def numeric_summary(df):
     """Return summary statistics for numeric columns in the DataFrame."""
@@ -192,8 +191,6 @@ def categorical_summary(df, verbose=True):
     if verbose:
         print("Categorical Summary Statistics:\n", summary)
     return summary
-categorical_stats = categorical_summary(df)
-
 
 # 15 Plot distributions for numeric columns
 def plot_distributions(df):
@@ -210,7 +207,7 @@ def plot_distributions(df):
 plot_distributions(df)
 
 # 16 Plot count plots for categorical columns
-def plot_categorical_counts(df):    
+def plot_categorical_counts(df):
     """Plot count plots for categorical columns in the DataFrame."""
     categorical_cols = df.select_dtypes(include=['object', 'category']).columns
     for col in categorical_cols:
@@ -285,7 +282,6 @@ def interactive_scatter_plot(df, x, y, color=None):
         fig.show()
 interactive_scatter_plot(df, x='loan_amount', y='income', color='Status')
 
-
 # 21 Save visualizations
 def save_visualizations(df):
     """Save key visualizations as image files."""
@@ -311,15 +307,8 @@ def export_summary_statistics(df, numeric_file='numeric_summary.csv', categorica
     print(f" Summary statistics exported: {numeric_file}, {categorical_file}")
 export_summary_statistics(df)
 
-
-
-
-'''MODEL TRAINING & EVALUATION'''
-
-
-
 #train test split
-from sklearn.model_selection import train_test_split    
+from sklearn.model_selection import train_test_split
 X = df.drop('Status', axis=1)
 y = df['Status']
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
@@ -332,10 +321,12 @@ def save_train_test_sets(X_train, X_test, y_train, y_test, prefix='loan_default'
     test = pd.concat([X_test, y_test], axis=1)
     train.to_csv(f"{prefix}_train.csv", index=False)
     test.to_csv(f"{prefix}_test.csv", index=False)
-    print(f" Train and test sets saved: {prefix}_train.csv, {prefix}_test.csv") 
+    print(f" Train and test sets saved: {prefix}_train.csv, {prefix}_test.csv")
 save_train_test_sets(X_train, X_test, y_train, y_test)
 
-
+model_results = []
+roc_data = {}
+evaluation_results = []
 
 #train linear regression model as a test
 from sklearn.linear_model import LinearRegression
@@ -346,35 +337,198 @@ def train_linear_regression(X_train, y_train, X_test, y_test):
     train_score = model.score(X_train, y_train)
     test_score = model.score(X_test, y_test)
     print(f" Linear Regression Train R^2: {train_score:.4f}, Test R^2: {test_score:.4f}")
+
+    #  metrics & plots
+    from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+    import matplotlib.pyplot as plt
+    import seaborn as sns
+    import numpy as np
+
+    # Predictions on test set
+    y_pred = model.predict(X_test)
+
+    # Metrics
+    mae = mean_absolute_error(y_test, y_pred)
+    mse = mean_squared_error(y_test, y_pred)
+    rmse = np.sqrt(mse)
+    r2 = r2_score(y_test, y_pred)   # redundant if you already printed .score(), but safe
+
+    print(f" MAE:  {mae:.4f}")
+    print(f" MSE:  {mse:.4f}")
+    print(f" RMSE: {rmse:.4f}")
+    print(f" R2 (test): {r2:.4f}")
+
+    # Predicted vs Actual scatter
+    plt.figure(figsize=(6,4))
+    sns.scatterplot(x=y_test, y=y_pred, alpha=0.6)
+    plt.plot([y_test.min(), y_test.max()], [y_test.min(), y_test.max()], 'k--', linewidth=1)
+    plt.xlabel("Actual")
+    plt.ylabel("Predicted")
+    plt.title("Linear Regression — Predicted vs Actual")
+    plt.tight_layout()
+    plt.show()
+
+    # Residuals histogram + KDE
+    residuals = y_test - y_pred
+    plt.figure(figsize=(6,4))
+    sns.histplot(residuals, kde=True)
+    plt.xlabel("Residual (Actual - Predicted)")
+    plt.title("Residuals Distribution")
+    plt.tight_layout()
+    plt.show()
+
+    model_results.append(["Linear Regression", test_score])
+
+
 train_linear_regression(X_train, y_train, X_test, y_test)
 
-
-#train logistic regression model as a test
 from sklearn.linear_model import LogisticRegression
+
 def train_logistic_regression(X_train, y_train, X_test, y_test):
-    """Train and evaluate a logistic regression model."""
     model = LogisticRegression(max_iter=1000)
     model.fit(X_train, y_train)
+
     train_score = model.score(X_train, y_train)
     test_score = model.score(X_test, y_test)
-    print(f" Logistic Regression Train Accuracy: {train_score:.4f}, Test Accuracy: {test_score:.4f}")
+
+    from sklearn.metrics import precision_score, recall_score, f1_score, roc_auc_score, confusion_matrix, roc_curve
+    import matplotlib.pyplot as plt
+    import seaborn as sns
+
+    y_pred = model.predict(X_test)
+    y_prob = model.predict_proba(X_test)[:, 1]
+
+    precision = precision_score(y_test, y_pred)
+    recall = recall_score(y_test, y_pred)
+    f1 = f1_score(y_test, y_pred)
+    roc_auc = roc_auc_score(y_test, y_prob)
+
+    print(f"LOGISTIC REGRESSION")
+
+    cm = confusion_matrix(y_test, y_pred)
+    plt.figure(figsize=(4,3))
+    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues')
+    plt.title("Logistic Regression - Confusion Matrix")
+    plt.xlabel("Predicted")
+    plt.ylabel("Actual")
+    plt.tight_layout()
+    plt.show()
+
+    fpr, tpr, _ = roc_curve(y_test, y_prob)
+    plt.figure(figsize=(5,4))
+    plt.plot(fpr, tpr, label=f"AUC = {roc_auc:.3f}")
+    plt.plot([0,1],[0,1],"k--")
+    plt.xlabel("False Positive Rate")
+    plt.ylabel("True Positive Rate")
+    plt.title("Logistic Regression - ROC Curve")
+    plt.legend()
+    plt.tight_layout()
+    plt.show()
+
+    y_train_prob = model.predict_proba(X_train)[:, 1]
+    y_train_pred = (y_train_prob >= 0.5).astype(int)
+
+    train_precision = precision_score(y_train, y_train_pred, zero_division=0)
+    train_recall    = recall_score(y_train, y_train_pred, zero_division=0)
+    train_f1        = f1_score(y_train, y_train_pred, zero_division=0)
+    train_auc       = roc_auc_score(y_train, y_train_prob)
+
+    print(f" Train Accuracy: {train_score:.4f}, Test Accuracy: {test_score:.4f}")
+    print(f" Train Precision: {train_precision:.4f}, Test Precision: {precision:.4f}")
+    print(f" Train Recall: {train_recall:.4f}, Test Recall: {recall:.4f}")
+    print(f" Train F1 Score: {train_f1:.4f}, Test F1 Score: {f1:.4f}")
+    print(f" Train ROC-AUC: {train_auc:.4f}, Test ROC-AUC: {roc_auc:.4f}")
+
+    model_results.append(["Logistic Regression", test_score])
+
+    evaluation_results.append([
+        "Logistic Regression",
+        train_score, train_precision, train_recall, train_f1, train_auc,
+        test_score, precision, recall, f1, roc_auc
+    ])
+
 train_logistic_regression(X_train, y_train, X_test, y_test)
 
-
-#train decision tree model as a test
 from sklearn.tree import DecisionTreeClassifier
+
 def train_decision_tree(X_train, y_train, X_test, y_test):
-    """Train and evaluate a decision tree classifier."""
     model = DecisionTreeClassifier(random_state=42)
     model.fit(X_train, y_train)
+
+    print("Decision Tree")
+
     train_score = model.score(X_train, y_train)
     test_score = model.score(X_test, y_test)
-    print(f" Decision Tree Train Accuracy: {train_score:.4f}, Test Accuracy: {test_score:.4f}")
+
+    from sklearn.metrics import precision_score, recall_score, f1_score, roc_auc_score, confusion_matrix, roc_curve
+    import matplotlib.pyplot as plt, seaborn as sns
+
+    y_pred = model.predict(X_test)
+
+    try:
+        y_score = model.predict_proba(X_test)[:, 1]
+    except:
+        try:
+            y_score = model.decision_function(X_test)
+        except:
+            y_score = None
+
+    precision = precision_score(y_test, y_pred, zero_division=0)
+    recall = recall_score(y_test, y_pred, zero_division=0)
+    f1 = f1_score(y_test, y_pred, zero_division=0)
+    roc_auc = roc_auc_score(y_test, y_score) if y_score is not None else float('nan')
+
+    cm = confusion_matrix(y_test, y_pred)
+    plt.figure(figsize=(4,3))
+    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues')
+    plt.title("Decision Tree - Confusion Matrix")
+    plt.xlabel("Predicted")
+    plt.ylabel("Actual")
+    plt.tight_layout()
+    plt.show()
+
+    if y_score is not None:
+        fpr, tpr, _ = roc_curve(y_test, y_score)
+        plt.figure(figsize=(5,4))
+        plt.plot(fpr, tpr, label=f"AUC = {roc_auc:.3f}")
+        plt.plot([0,1],[0,1],'k--')
+        plt.xlabel("False Positive Rate")
+        plt.ylabel("True Positive Rate")
+        plt.title("Decision Tree - ROC Curve")
+        plt.legend()
+        plt.tight_layout()
+        plt.show()
+
+    y_train_pred = model.predict(X_train)
+
+    try:
+        y_train_prob = model.predict_proba(X_train)[:, 1]
+        train_auc = roc_auc_score(y_train, y_train_prob)
+    except:
+        train_auc = float('nan')
+
+    train_precision = precision_score(y_train, y_train_pred, zero_division=0)
+    train_recall    = recall_score(y_train, y_train_pred, zero_division=0)
+    train_f1        = f1_score(y_train, y_train_pred, zero_division=0)
+
+    print(f" Train Accuracy: {train_score:.4f}, Test Accuracy: {test_score:.4f}")
+    print(f" Train Precision: {train_precision:.4f}, Test Precision: {precision:.4f}")
+    print(f" Train Recall: {train_recall:.4f}, Test Recall: {recall:.4f}")
+    print(f" Train F1 Score: {train_f1:.4f}, Test F1 Score: {f1:.4f}")
+    print(f" Train ROC-AUC: {train_auc:.4f}, Test ROC-AUC: {roc_auc:.4f}")
+
+    model_results.append(["Decision Tree", test_score])
+
+    evaluation_results.append([
+        "Decision Tree",
+        train_score, train_precision, train_recall, train_f1, train_auc,
+        test_score, precision, recall, f1, roc_auc
+    ])
+
 train_decision_tree(X_train, y_train, X_test, y_test)
 
-
 #train random forest model as a test
-from sklearn.ensemble import RandomForestClassifier 
+from sklearn.ensemble import RandomForestClassifier
 def train_random_forest(X_train, y_train, X_test, y_test):
     """Train and evaluate a random forest classifier."""
     model = RandomForestClassifier(n_estimators=100, random_state=42)
@@ -382,11 +536,125 @@ def train_random_forest(X_train, y_train, X_test, y_test):
     train_score = model.score(X_train, y_train)
     test_score = model.score(X_test, y_test)
     print(f" Random Forest Train Accuracy: {train_score:.4f}, Test Accuracy: {test_score:.4f}")
+
+    from sklearn.metrics import precision_score, recall_score, f1_score, roc_auc_score, confusion_matrix, roc_curve
+    import matplotlib.pyplot as plt, seaborn as sns
+    y_pred = model.predict(X_test)
+    try:
+        y_score = model.predict_proba(X_test)[:, 1]
+    except Exception:
+        try:
+            y_score = model.decision_function(X_test)
+        except Exception:
+            y_score = None
+
+    precision = precision_score(y_test, y_pred, zero_division=0)
+    recall = recall_score(y_test, y_pred, zero_division=0)
+    f1 = f1_score(y_test, y_pred, zero_division=0)
+    print(f" Precision: {precision:.4f}")
+    print(f" Recall:    {recall:.4f}")
+    print(f" F1 Score:  {f1:.4f}")
+    if y_score is not None:
+        roc_auc = roc_auc_score(y_test, y_score)
+        print(f" ROC-AUC:   {roc_auc:.4f}")
+    else:
+        print(" ROC-AUC:   N/A (no proba/score)")
+
+    cm = confusion_matrix(y_test, y_pred)
+    plt.figure(figsize=(4,3))
+    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues')
+    plt.title("Random Forest - Confusion Matrix")
+    plt.xlabel("Predicted"); plt.ylabel("Actual")
+    plt.tight_layout(); plt.show()
+
+    if y_score is not None:
+        fpr, tpr, _ = roc_curve(y_test, y_score)
+        plt.figure(figsize=(5,4))
+        plt.plot(fpr, tpr, label=f"AUC = {roc_auc:.3f}")
+        plt.plot([0,1],[0,1],'k--')
+        plt.xlabel("False Positive Rate"); plt.ylabel("True Positive Rate")
+        plt.title("Random Forest - ROC")
+        plt.legend(); plt.tight_layout(); plt.show()
+
+    model_results.append(["Random Forest", test_score])
+
+
 train_random_forest(X_train, y_train, X_test, y_test)
 
+from sklearn.ensemble import RandomForestClassifier
+
+def train_random_forest(X_train, y_train, X_test, y_test):
+    model = RandomForestClassifier(n_estimators=100, random_state=42)
+    model.fit(X_train, y_train)
+
+    print("Random Forest")
+
+    train_score = model.score(X_train, y_train)
+    test_score  = model.score(X_test, y_test)
+
+    from sklearn.metrics import precision_score, recall_score, f1_score, roc_auc_score, confusion_matrix, roc_curve
+    import matplotlib.pyplot as plt, seaborn as sns
+
+    y_pred = model.predict(X_test)
+
+    try:
+        y_score = model.predict_proba(X_test)[:, 1]
+    except:
+        try:
+            y_score = model.decision_function(X_test)
+        except:
+            y_score = None
+
+    precision = precision_score(y_test, y_pred, zero_division=0)
+    recall    = recall_score(y_test, y_pred, zero_division=0)
+    f1        = f1_score(y_test, y_pred, zero_division=0)
+    roc_auc   = roc_auc_score(y_test, y_score) if y_score is not None else float('nan')
+
+    cm = confusion_matrix(y_test, y_pred)
+    plt.figure(figsize=(4,3))
+    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues')
+    plt.title("Random Forest - Confusion Matrix")
+    plt.xlabel("Predicted"); plt.ylabel("Actual")
+    plt.tight_layout(); plt.show()
+
+    if y_score is not None:
+        fpr, tpr, _ = roc_curve(y_test, y_score)
+        plt.figure(figsize=(5,4))
+        plt.plot(fpr, tpr, label=f"AUC = {roc_auc:.3f}")
+        plt.plot([0,1],[0,1],'k--')
+        plt.xlabel("False Positive Rate"); plt.ylabel("True Positive Rate")
+        plt.title("Random Forest - ROC Curve")
+        plt.legend(); plt.tight_layout(); plt.show()
+
+    y_train_pred = model.predict(X_train)
+
+    try:
+        y_train_prob = model.predict_proba(X_train)[:, 1]
+        train_auc = roc_auc_score(y_train, y_train_prob)
+    except:
+        train_auc = float('nan')
+
+    train_precision = precision_score(y_train, y_train_pred, zero_division=0)
+    train_recall    = recall_score(y_train, y_train_pred, zero_division=0)
+    train_f1        = f1_score(y_train, y_train_pred, zero_division=0)
+
+    print(f" Train Accuracy: {train_score:.4f}, Test Accuracy: {test_score:.4f}")
+    print(f" Train Precision: {train_precision:.4f}, Test Precision: {precision:.4f}")
+    print(f" Train Recall: {train_recall:.4f}, Test Recall: {recall:.4f}")
+    print(f" Train F1 Score: {train_f1:.4f}, Test F1 Score: {f1:.4f}")
+    print(f" Train ROC-AUC: {train_auc:.4f}, Test ROC-AUC: {roc_auc:.4f}")
+
+    model_results.append(["Random Forest", test_score])
+
+    evaluation_results.append([
+        "Random Forest",
+        train_score, train_precision, train_recall, train_f1, train_auc,
+        test_score, precision, recall, f1, roc_auc
+    ])
+train_random_forest(X_train, y_train, X_test, y_test)
 
 #hyperparameter tuning with grid search for random forest
-from sklearn.model_selection import GridSearchCV    
+from sklearn.model_selection import GridSearchCV
 def hyperparameter_tuning_rf(X_train, y_train):
     """Perform hyperparameter tuning for Random Forest using GridSearchCV."""
     param_grid = {
@@ -402,46 +670,156 @@ def hyperparameter_tuning_rf(X_train, y_train):
 hyperparameter_tuning_rf(X_train, y_train)
 
 
-
-# train knn model as a test
 from sklearn.neighbors import KNeighborsClassifier
+
 def train_knn(X_train, y_train, X_test, y_test, n_neighbors=5):
-    """Train and evaluate a K-Nearest Neighbors classifier."""
     model = KNeighborsClassifier(n_neighbors=n_neighbors)
     model.fit(X_train, y_train)
+
+    print("KNN")
+
     train_score = model.score(X_train, y_train)
     test_score = model.score(X_test, y_test)
-    print(f" KNN (k={n_neighbors}) Train Accuracy: {train_score:.4f}, Test Accuracy: {test_score:.4f}")
+
+    from sklearn.metrics import precision_score, recall_score, f1_score, roc_auc_score, confusion_matrix, roc_curve
+    import matplotlib.pyplot as plt, seaborn as sns
+
+    y_pred = model.predict(X_test)
+
+    try:
+        y_score = model.predict_proba(X_test)[:, 1]
+    except:
+        try:
+            y_score = model.decision_function(X_test)
+        except:
+            y_score = None
+
+    precision = precision_score(y_test, y_pred, zero_division=0)
+    recall = recall_score(y_test, y_pred, zero_division=0)
+    f1 = f1_score(y_test, y_pred, zero_division=0)
+    roc_auc = roc_auc_score(y_test, y_score) if y_score is not None else float('nan')
+
+    cm = confusion_matrix(y_test, y_pred)
+    plt.figure(figsize=(4,3))
+    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues')
+    plt.title("KNN - Confusion Matrix")
+    plt.xlabel("Predicted")
+    plt.ylabel("Actual")
+    plt.tight_layout()
+    plt.show()
+
+    if y_score is not None:
+        fpr, tpr, _ = roc_curve(y_test, y_score)
+        plt.figure(figsize=(5,4))
+        plt.plot(fpr, tpr, label=f"AUC = {roc_auc:.3f}")
+        plt.plot([0,1],[0,1],'k--')
+        plt.xlabel("False Positive Rate")
+        plt.ylabel("True Positive Rate")
+        plt.title("KNN - ROC Curve")
+        plt.legend()
+        plt.tight_layout()
+        plt.show()
+
+    # TRAIN METRICS
+    y_train_pred = model.predict(X_train)
+    try:
+        y_train_prob = model.predict_proba(X_train)[:, 1]
+        train_auc = roc_auc_score(y_train, y_train_prob)
+    except:
+        train_auc = float('nan')
+
+    train_precision = precision_score(y_train, y_train_pred, zero_division=0)
+    train_recall = recall_score(y_train, y_train_pred, zero_division=0)
+    train_f1 = f1_score(y_train, y_train_pred, zero_division=0)
+
+    print(f" Train Accuracy: {train_score:.4f}, Test Accuracy: {test_score:.4f}")
+    print(f" Train Precision: {train_precision:.4f}, Test Precision: {precision:.4f}")
+    print(f" Train Recall: {train_recall:.4f}, Test Recall: {recall:.4f}")
+    print(f" Train F1 Score: {train_f1:.4f}, Test F1 Score: {f1:.4f}")
+    print(f" Train ROC-AUC: {train_auc:.4f}, Test ROC-AUC: {roc_auc:.4f}")
+
+    model_results.append(["KNN", test_score])
+
+    evaluation_results.append([
+        "KNN",
+        train_score, train_precision, train_recall, train_f1, train_auc,
+        test_score, precision, recall, f1, roc_auc
+    ])
 train_knn(X_train, y_train, X_test, y_test, n_neighbors=5)
 
-# train naive bayes model as a test
 from sklearn.naive_bayes import GaussianNB
+
 def train_naive_bayes(X_train, y_train, X_test, y_test):
-    """Train and evaluate a Gaussian Naive Bayes classifier."""
     model = GaussianNB()
     model.fit(X_train, y_train)
+
+    print("Naive Bayes")
+
     train_score = model.score(X_train, y_train)
-    test_score = model.score(X_test, y_test)
-    print(f" Naive Bayes Train Accuracy: {train_score:.4f}, Test Accuracy: {test_score:.4f}")
+    test_score  = model.score(X_test, y_test)
+
+    from sklearn.metrics import precision_score, recall_score, f1_score, roc_auc_score, confusion_matrix, roc_curve
+    import matplotlib.pyplot as plt, seaborn as sns
+
+    y_pred = model.predict(X_test)
+
+    try:
+        y_score = model.predict_proba(X_test)[:, 1]
+    except:
+        try:
+            y_score = model.decision_function(X_test)
+        except:
+            y_score = None
+
+    precision = precision_score(y_test, y_pred, zero_division=0)
+    recall    = recall_score(y_test, y_pred, zero_division=0)
+    f1        = f1_score(y_test, y_pred, zero_division=0)
+    roc_auc   = roc_auc_score(y_test, y_score) if y_score is not None else float('nan')
+
+    cm = confusion_matrix(y_test, y_pred)
+    plt.figure(figsize=(4,3))
+    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues')
+    plt.title("Naive Bayes - Confusion Matrix")
+    plt.xlabel("Predicted"); plt.ylabel("Actual")
+    plt.tight_layout(); plt.show()
+
+    if y_score is not None:
+        fpr, tpr, _ = roc_curve(y_test, y_score)
+        plt.figure(figsize=(5,4))
+        plt.plot(fpr, tpr, label=f"AUC = {roc_auc:.3f}")
+        plt.plot([0,1],[0,1], 'k--')
+        plt.xlabel("False Positive Rate"); plt.ylabel("True Positive Rate")
+        plt.title("Naive Bayes - ROC Curve")
+        plt.legend(); plt.tight_layout(); plt.show()
+
+    # TRAIN METRICS
+    y_train_pred = model.predict(X_train)
+    try:
+        y_train_prob = model.predict_proba(X_train)[:, 1]
+        train_auc = roc_auc_score(y_train, y_train_prob)
+    except:
+        train_auc = float('nan')
+
+    train_precision = precision_score(y_train, y_train_pred, zero_division=0)
+    train_recall    = recall_score(y_train, y_train_pred, zero_division=0)
+    train_f1        = f1_score(y_train, y_train_pred, zero_division=0)
+
+    print(f" Train Accuracy: {train_score:.4f}, Test Accuracy: {test_score:.4f}")
+    print(f" Train Precision: {train_precision:.4f}, Test Precision: {precision:.4f}")
+    print(f" Train Recall: {train_recall:.4f}, Test Recall: {recall:.4f}")
+    print(f" Train F1 Score: {train_f1:.4f}, Test F1 Score: {f1:.4f}")
+    print(f" Train ROC-AUC: {train_auc:.4f}, Test ROC-AUC: {roc_auc:.4f}")
+
+    model_results.append(["Naive Bayes", test_score])
+
+    evaluation_results.append([
+        "Naive Bayes",
+        train_score, train_precision, train_recall, train_f1, train_auc,
+        test_score, precision, recall, f1, roc_auc
+    ])
 train_naive_bayes(X_train, y_train, X_test, y_test)
 
-
-# train svm model as a test
-from sklearn.svm import SVC
-def train_svm(X_train, y_train, X_test, y_test):
-    """Train and evaluate a Support Vector Machine classifier."""
-    model = SVC(random_state=42)
-    model.fit(X_train, y_train)
-    train_score = model.score(X_train, y_train)
-    test_score = model.score(X_test, y_test)
-    print(f" SVM Train Accuracy: {train_score:.4f}, Test Accuracy: {test_score:.4f}")
-train_svm(X_train, y_train, X_test, y_test)
-
-
-
-
-
-#handle class imbalance with SMOTE  
+#handle class imbalance with SMOTE
 from imblearn.over_sampling import SMOTE
 def apply_smote(X_train, y_train):
     """Apply SMOTE to balance the training dataset."""
@@ -451,137 +829,765 @@ def apply_smote(X_train, y_train):
     return X_res, y_res
 X_train, y_train = apply_smote(X_train, y_train)
 
-#train balanced random forest model as a test
 from imblearn.ensemble import BalancedRandomForestClassifier
-from imblearn.ensemble import EasyEnsembleClassifier
+
 def train_balanced_random_forest(X_train, y_train, X_test, y_test):
-    """Train and evaluate a Balanced Random Forest classifier."""
     model = BalancedRandomForestClassifier(n_estimators=100, random_state=42)
     model.fit(X_train, y_train)
+
+    print("Balanced Random Forest")
+
     train_score = model.score(X_train, y_train)
-    test_score = model.score(X_test, y_test)
-    print(f" Balanced Random Forest Train Accuracy: {train_score:.4f}, Test Accuracy: {test_score:.4f}")
+    test_score  = model.score(X_test, y_test)
+
+    from sklearn.metrics import precision_score, recall_score, f1_score, roc_auc_score, confusion_matrix, roc_curve
+    import matplotlib.pyplot as plt, seaborn as sns
+
+    y_pred = model.predict(X_test)
+    y_prob = model.predict_proba(X_test)[:, 1]
+
+    precision = precision_score(y_test, y_pred, zero_division=0)
+    recall    = recall_score(y_test, y_pred, zero_division=0)
+    f1        = f1_score(y_test, y_pred, zero_division=0)
+    roc_auc   = roc_auc_score(y_test, y_prob)
+
+    cm = confusion_matrix(y_test, y_pred)
+    plt.figure(figsize=(4,3))
+    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues')
+    plt.title("Balanced Random Forest - Confusion Matrix")
+    plt.xlabel("Predicted")
+    plt.ylabel("Actual")
+    plt.tight_layout()
+    plt.show()
+
+    fpr, tpr, _ = roc_curve(y_test, y_prob)
+    plt.figure(figsize=(5,4))
+    plt.plot(fpr, tpr, label=f"AUC = {roc_auc:.3f}")
+    plt.plot([0,1], [0,1], 'k--')
+    plt.xlabel("False Positive Rate")
+    plt.ylabel("True Positive Rate")
+    plt.title("Balanced Random Forest - ROC Curve")
+    plt.legend()
+    plt.tight_layout()
+    plt.show()
+
+    # TRAIN METRICS
+    y_train_pred = model.predict(X_train)
+    y_train_prob = model.predict_proba(X_train)[:, 1]
+
+    train_precision = precision_score(y_train, y_train_pred, zero_division=0)
+    train_recall    = recall_score(y_train, y_train_pred, zero_division=0)
+    train_f1        = f1_score(y_train, y_train_pred, zero_division=0)
+    train_auc       = roc_auc_score(y_train, y_train_prob)
+
+    print(f" Train Accuracy: {train_score:.4f}, Test Accuracy: {test_score:.4f}")
+    print(f" Train Precision: {train_precision:.4f}, Test Precision: {precision:.4f}")
+    print(f" Train Recall: {train_recall:.4f}, Test Recall: {recall:.4f}")
+    print(f" Train F1 Score: {train_f1:.4f}, Test F1 Score: {f1:.4f}")
+    print(f" Train ROC-AUC: {train_auc:.4f}, Test ROC-AUC: {roc_auc:.4f}")
+
+    model_results.append(["Balanced Random Forest", test_score])
+
+    evaluation_results.append([
+        "Balanced Random Forest",
+        train_score, train_precision, train_recall, train_f1, train_auc,
+        test_score, precision, recall, f1, roc_auc
+    ])
+
+    roc_data["Balanced Random Forest"] = (fpr, tpr, roc_auc)
 train_balanced_random_forest(X_train, y_train, X_test, y_test)
 
+!pip install catboost
+!pip install lightgbm
+!pip install xgboost
 
-
-
-
-# train xgboost model as a test
 import xgboost as xgb
+
 def train_xgboost(X_train, y_train, X_test, y_test):
-    """Train and evaluate an XGBoost classifier."""
     model = xgb.XGBClassifier(use_label_encoder=False, eval_metric='logloss', random_state=42)
     model.fit(X_train, y_train)
+
+    print("XGBoost")
+
     train_score = model.score(X_train, y_train)
-    test_score = model.score(X_test, y_test)
-    print(f" XGBoost Train Accuracy: {train_score:.4f}, Test Accuracy: {test_score:.4f}")
+    test_score  = model.score(X_test, y_test)
+
+    from sklearn.metrics import precision_score, recall_score, f1_score, roc_auc_score, confusion_matrix, roc_curve
+    import matplotlib.pyplot as plt, seaborn as sns
+
+    y_pred = model.predict(X_test)
+
+    try:
+        y_score = model.predict_proba(X_test)[:, 1]
+    except:
+        try:
+            y_score = model.decision_function(X_test)
+        except:
+            y_score = None
+
+    precision = precision_score(y_test, y_pred, zero_division=0)
+    recall    = recall_score(y_test, y_pred, zero_division=0)
+    f1        = f1_score(y_test, y_pred, zero_division=0)
+    roc_auc   = roc_auc_score(y_test, y_score) if y_score is not None else float('nan')
+
+    cm = confusion_matrix(y_test, y_pred)
+    plt.figure(figsize=(4,3))
+    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues')
+    plt.title("XGBoost - Confusion Matrix")
+    plt.xlabel("Predicted")
+    plt.ylabel("Actual")
+    plt.tight_layout()
+    plt.show()
+
+    if y_score is not None:
+        fpr, tpr, _ = roc_curve(y_test, y_score)
+        plt.figure(figsize=(5,4))
+        plt.plot(fpr, tpr, label=f"AUC = {roc_auc:.3f}")
+        plt.plot([0,1], [0,1], 'k--')
+        plt.xlabel("False Positive Rate")
+        plt.ylabel("True Positive Rate")
+        plt.title("XGBoost - ROC Curve")
+        plt.legend()
+        plt.tight_layout()
+        plt.show()
+
+    # Train metrics
+    y_train_pred = model.predict(X_train)
+
+    try:
+        y_train_prob = model.predict_proba(X_train)[:, 1]
+        train_auc = roc_auc_score(y_train, y_train_prob)
+    except:
+        train_auc = float('nan')
+
+    train_precision = precision_score(y_train, y_train_pred, zero_division=0)
+    train_recall    = recall_score(y_train, y_train_pred, zero_division=0)
+    train_f1        = f1_score(y_train, y_train_pred, zero_division=0)
+
+    print(f" Train Accuracy: {train_score:.4f}, Test Accuracy: {test_score:.4f}")
+    print(f" Train Precision: {train_precision:.4f}, Test Precision: {precision:.4f}")
+    print(f" Train Recall: {train_recall:.4f}, Test Recall: {recall:.4f}")
+    print(f" Train F1 Score: {train_f1:.4f}, Test F1 Score: {f1:.4f}")
+    print(f" Train ROC-AUC: {train_auc:.4f}, Test ROC-AUC: {roc_auc:.4f}")
+
+    model_results.append(["XGBoost", test_score])
+
+    evaluation_results.append([
+        "XGBoost",
+        train_score, train_precision, train_recall, train_f1, train_auc,
+        test_score, precision, recall, f1, roc_auc
+    ])
 train_xgboost(X_train, y_train, X_test, y_test)
 
-#train catboost model as a test
 from catboost import CatBoostClassifier
-def train_catboost(X_train, y_train, X_test, y_test):   
-    """Train and evaluate a CatBoost classifier."""
+
+def train_catboost(X_train, y_train, X_test, y_test):
     model = CatBoostClassifier(verbose=0, random_state=42)
     model.fit(X_train, y_train)
+
+    print("CatBoost")
+
     train_score = model.score(X_train, y_train)
-    test_score = model.score(X_test, y_test)
-    print(f" CatBoost Train Accuracy: {train_score:.4f}, Test Accuracy: {test_score:.4f}")
+    test_score  = model.score(X_test, y_test)
+
+    from sklearn.metrics import precision_score, recall_score, f1_score, roc_auc_score, confusion_matrix, roc_curve
+    import matplotlib.pyplot as plt, seaborn as sns
+
+    y_pred = model.predict(X_test)
+
+    try:
+        y_score = model.predict_proba(X_test)[:, 1]
+    except:
+        try:
+            y_score = model.predict(X_test, prediction_type='Probability')[:, 1]
+        except:
+            y_score = None
+
+    precision = precision_score(y_test, y_pred, zero_division=0)
+    recall    = recall_score(y_test, y_pred, zero_division=0)
+    f1        = f1_score(y_test, y_pred, zero_division=0)
+    roc_auc   = roc_auc_score(y_test, y_score) if y_score is not None else float('nan')
+
+    cm = confusion_matrix(y_test, y_pred)
+    plt.figure(figsize=(4,3))
+    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues')
+    plt.title("CatBoost - Confusion Matrix")
+    plt.xlabel("Predicted")
+    plt.ylabel("Actual")
+    plt.tight_layout()
+    plt.show()
+
+    if y_score is not None:
+        fpr, tpr, _ = roc_curve(y_test, y_score)
+        plt.figure(figsize=(5,4))
+        plt.plot(fpr, tpr, label=f"AUC = {roc_auc:.3f}")
+        plt.plot([0,1], [0,1], 'k--')
+        plt.xlabel("False Positive Rate")
+        plt.ylabel("True Positive Rate")
+        plt.title("CatBoost - ROC Curve")
+        plt.legend()
+        plt.tight_layout()
+        plt.show()
+
+    y_train_pred = model.predict(X_train)
+
+    try:
+        y_train_prob = model.predict_proba(X_train)[:, 1]
+        train_auc = roc_auc_score(y_train, y_train_prob)
+    except:
+        train_auc = float('nan')
+
+    train_precision = precision_score(y_train, y_train_pred, zero_division=0)
+    train_recall    = recall_score(y_train, y_train_pred, zero_division=0)
+    train_f1        = f1_score(y_train, y_train_pred, zero_division=0)
+
+    print(f" Train Accuracy: {train_score:.4f}, Test Accuracy: {test_score:.4f}")
+    print(f" Train Precision: {train_precision:.4f}, Test Precision: {precision:.4f}")
+    print(f" Train Recall: {train_recall:.4f}, Test Recall: {recall:.4f}")
+    print(f" Train F1 Score: {train_f1:.4f}, Test F1 Score: {f1:.4f}")
+    print(f" Train ROC-AUC: {train_auc:.4f}, Test ROC-AUC: {roc_auc:.4f}")
+
+    model_results.append(["CatBoost", test_score])
+
+    evaluation_results.append([
+        "CatBoost",
+        train_score, train_precision, train_recall, train_f1, train_auc,
+        test_score, precision, recall, f1, roc_auc
+    ])
 train_catboost(X_train, y_train, X_test, y_test)
 
+import lightgbm as lgb
 
-#train lightgbm model as a test
-import lightgbm as lgb  
 def train_lightgbm(X_train, y_train, X_test, y_test):
-    """Train and evaluate a LightGBM classifier."""
     model = lgb.LGBMClassifier(random_state=42)
     model.fit(X_train, y_train)
+
+    print("LightGBM")
+
     train_score = model.score(X_train, y_train)
-    test_score = model.score(X_test, y_test)
-    print(f" LightGBM Train Accuracy: {train_score:.4f}, Test Accuracy: {test_score:.4f}")
+    test_score  = model.score(X_test, y_test)
+
+    from sklearn.metrics import precision_score, recall_score, f1_score, roc_auc_score, confusion_matrix, roc_curve
+    import matplotlib.pyplot as plt, seaborn as sns
+
+    y_pred = model.predict(X_test)
+
+    try:
+        y_score = model.predict_proba(X_test)[:, 1]
+    except:
+        try:
+            y_score = model.predict(X_test)
+        except:
+            y_score = None
+
+    precision = precision_score(y_test, y_pred, zero_division=0)
+    recall    = recall_score(y_test, y_pred, zero_division=0)
+    f1        = f1_score(y_test, y_pred, zero_division=0)
+    roc_auc   = roc_auc_score(y_test, y_score) if (y_score is not None and len(set(y_score)) > 1) else float('nan')
+
+    cm = confusion_matrix(y_test, y_pred)
+    plt.figure(figsize=(4,3))
+    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues')
+    plt.title("LightGBM - Confusion Matrix")
+    plt.xlabel("Predicted")
+    plt.ylabel("Actual")
+    plt.tight_layout()
+    plt.show()
+
+    if y_score is not None:
+        try:
+            fpr, tpr, _ = roc_curve(y_test, y_score)
+            plt.figure(figsize=(5,4))
+            plt.plot(fpr, tpr, label=f"AUC = {roc_auc:.3f}")
+            plt.plot([0,1], [0,1], 'k--')
+            plt.xlabel("False Positive Rate")
+            plt.ylabel("True Positive Rate")
+            plt.title("LightGBM - ROC Curve")
+            plt.legend()
+            plt.tight_layout()
+            plt.show()
+        except:
+            pass
+
+    y_train_pred = model.predict(X_train)
+
+    try:
+        y_train_prob = model.predict_proba(X_train)[:, 1]
+        train_auc = roc_auc_score(y_train, y_train_prob)
+    except:
+        train_auc = float('nan')
+
+    train_precision = precision_score(y_train, y_train_pred, zero_division=0)
+    train_recall    = recall_score(y_train, y_train_pred, zero_division=0)
+    train_f1        = f1_score(y_train, y_train_pred, zero_division=0)
+
+    print(f" Train Accuracy: {train_score:.4f}, Test Accuracy: {test_score:.4f}")
+    print(f" Train Precision: {train_precision:.4f}, Test Precision: {precision:.4f}")
+    print(f" Train Recall: {train_recall:.4f}, Test Recall: {recall:.4f}")
+    print(f" Train F1 Score: {train_f1:.4f}, Test F1 Score: {f1:.4f}")
+    print(f" Train ROC-AUC: {train_auc:.4f}, Test ROC-AUC: {roc_auc:.4f}")
+
+    model_results.append(["LightGBM", test_score])
+
+    evaluation_results.append([
+        "LightGBM",
+        train_score, train_precision, train_recall, train_f1, train_auc,
+        test_score, precision, recall, f1, roc_auc
+    ])
 train_lightgbm(X_train, y_train, X_test, y_test)
 
-
-
-
-
-
-#train ensemble model as a test
 from sklearn.ensemble import VotingClassifier
+
 def train_ensemble_model(X_train, y_train, X_test, y_test):
-    """Train and evaluate an ensemble voting classifier."""
     model1 = LogisticRegression(max_iter=1000)
     model2 = DecisionTreeClassifier(random_state=42)
     model3 = RandomForestClassifier(n_estimators=100, random_state=42)
-    ensemble = VotingClassifier(estimators=[
-        ('lr', model1),
-        ('dt', model2),
-        ('rf', model3)
-    ], voting='hard')
+
+    ensemble = VotingClassifier(
+        estimators=[('lr', model1), ('dt', model2), ('rf', model3)],
+        voting='hard'
+    )
+
     ensemble.fit(X_train, y_train)
+
+    print("Voting Classifier")
+
     train_score = ensemble.score(X_train, y_train)
-    test_score = ensemble.score(X_test, y_test)
-    print(f" Ensemble Model Train Accuracy: {train_score:.4f}, Test Accuracy: {test_score:.4f}")
+    test_score  = ensemble.score(X_test, y_test)
+
+    from sklearn.metrics import precision_score, recall_score, f1_score, roc_auc_score, confusion_matrix, roc_curve
+    import matplotlib.pyplot as plt, seaborn as sns
+
+    y_pred = ensemble.predict(X_test)
+
+    try:
+        y_prob = ensemble.predict_proba(X_test)[:, 1]
+    except:
+        y_prob = y_pred
+
+    precision = precision_score(y_test, y_pred, zero_division=0)
+    recall    = recall_score(y_test, y_pred, zero_division=0)
+    f1        = f1_score(y_test, y_pred, zero_division=0)
+    roc_auc   = roc_auc_score(y_test, y_prob)
+
+    cm = confusion_matrix(y_test, y_pred)
+    plt.figure(figsize=(4,3))
+    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues')
+    plt.title("Voting Classifier - Confusion Matrix")
+    plt.xlabel("Predicted")
+    plt.ylabel("Actual")
+    plt.tight_layout()
+    plt.show()
+
+    fpr, tpr, _ = roc_curve(y_test, y_prob)
+    plt.figure(figsize=(5,4))
+    plt.plot(fpr, tpr, label=f"AUC = {roc_auc:.3f}")
+    plt.plot([0,1], [0,1], 'k--')
+    plt.xlabel("False Positive Rate")
+    plt.ylabel("True Positive Rate")
+    plt.title("Voting Classifier - ROC Curve")
+    plt.legend()
+    plt.tight_layout()
+    plt.show()
+
+    # TRAIN METRICS
+    y_train_pred = ensemble.predict(X_train)
+
+    try:
+        y_train_prob = ensemble.predict_proba(X_train)[:, 1]
+        train_auc = roc_auc_score(y_train, y_train_prob)
+    except:
+        train_auc = float('nan')
+
+    train_precision = precision_score(y_train, y_train_pred, zero_division=0)
+    train_recall    = recall_score(y_train, y_train_pred, zero_division=0)
+    train_f1        = f1_score(y_train, y_train_pred, zero_division=0)
+
+    print(f" Train Accuracy: {train_score:.4f}, Test Accuracy: {test_score:.4f}")
+    print(f" Train Precision: {train_precision:.4f}, Test Precision: {precision:.4f}")
+    print(f" Train Recall: {train_recall:.4f}, Test Recall: {recall:.4f}")
+    print(f" Train F1 Score: {train_f1:.4f}, Test F1 Score: {f1:.4f}")
+    print(f" Train ROC-AUC: {train_auc:.4f}, Test ROC-AUC: {roc_auc:.4f}")
+
+    model_results.append(["Voting Classifier", test_score])
+
+    evaluation_results.append([
+        "Voting Classifier",
+        train_score, train_precision, train_recall, train_f1, train_auc,
+        test_score, precision, recall, f1, roc_auc
+    ])
+
+    roc_data["Voting Classifier"] = (fpr, tpr, roc_auc)
 train_ensemble_model(X_train, y_train, X_test, y_test)
 
-#train stacking model as a test
 from sklearn.ensemble import StackingClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import RandomForestClassifier
+
 def train_stacking_model(X_train, y_train, X_test, y_test):
-    """Train and evaluate a stacking classifier."""
     estimators = [
         ('lr', LogisticRegression(max_iter=1000)),
         ('dt', DecisionTreeClassifier(random_state=42)),
         ('rf', RandomForestClassifier(n_estimators=100, random_state=42))
     ]
-    stacking = StackingClassifier(estimators=estimators, final_estimator=LogisticRegression(), cv=5)
+
+    stacking = StackingClassifier(
+        estimators=estimators,
+        final_estimator=LogisticRegression(),
+        cv=5,
+        n_jobs=-1
+    )
+
     stacking.fit(X_train, y_train)
+
+    print("Stacking Classifier")
+
     train_score = stacking.score(X_train, y_train)
-    test_score = stacking.score(X_test, y_test)
-    print(f" Stacking Model Train Accuracy: {train_score:.4f}, Test Accuracy: {test_score:.4f}")
+    test_score  = stacking.score(X_test, y_test)
+
+    from sklearn.metrics import precision_score, recall_score, f1_score, roc_auc_score, confusion_matrix, roc_curve
+    import matplotlib.pyplot as plt, seaborn as sns
+    import numpy as np
+
+    y_pred = stacking.predict(X_test)
+
+    try:
+        y_score = stacking.predict_proba(X_test)[:, 1]
+    except:
+        try:
+            y_score = stacking.decision_function(X_test)
+        except:
+            y_score = None
+
+    precision = precision_score(y_test, y_pred, zero_division=0)
+    recall    = recall_score(y_test, y_pred, zero_division=0)
+    f1        = f1_score(y_test, y_pred, zero_division=0)
+    roc_auc   = roc_auc_score(y_test, y_score) if y_score is not None else float('nan')
+
+    cm = confusion_matrix(y_test, y_pred)
+    plt.figure(figsize=(4,3))
+    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues')
+    plt.title("Stacking - Confusion Matrix")
+    plt.xlabel("Predicted")
+    plt.ylabel("Actual")
+    plt.tight_layout()
+    plt.show()
+
+    if y_score is not None:
+        try:
+            fpr, tpr, _ = roc_curve(y_test, y_score)
+            plt.figure(figsize=(5,4))
+            plt.plot(fpr, tpr, label=f"AUC = {roc_auc:.3f}")
+            plt.plot([0,1], [0,1], 'k--')
+            plt.xlabel("False Positive Rate")
+            plt.ylabel("True Positive Rate")
+            plt.title("Stacking - ROC Curve")
+            plt.legend()
+            plt.tight_layout()
+            plt.show()
+            roc_data["Stacking Classifier"] = (fpr, tpr, roc_auc)
+        except:
+            roc_data["Stacking Classifier"] = (None, None, np.nan)
+    else:
+        roc_data["Stacking Classifier"] = (None, None, np.nan)
+
+    # TRAIN METRICS
+    y_train_pred = stacking.predict(X_train)
+
+    try:
+        y_train_prob = stacking.predict_proba(X_train)[:, 1]
+        train_auc = roc_auc_score(y_train, y_train_prob)
+    except:
+        train_auc = float('nan')
+
+    train_precision = precision_score(y_train, y_train_pred, zero_division=0)
+    train_recall    = recall_score(y_train, y_train_pred, zero_division=0)
+    train_f1        = f1_score(y_train, y_train_pred, zero_division=0)
+
+    print(f" Train Accuracy: {train_score:.4f}, Test Accuracy: {test_score:.4f}")
+    print(f" Train Precision: {train_precision:.4f}, Test Precision: {precision:.4f}")
+    print(f" Train Recall: {train_recall:.4f}, Test Recall: {recall:.4f}")
+    print(f" Train F1 Score: {train_f1:.4f}, Test F1 Score: {f1:.4f}")
+    print(f" Train ROC-AUC: {train_auc:.4f}, Test ROC-AUC: {roc_auc:.4f}")
+
+    model_results.append(["Stacking Classifier", test_score])
+
+    evaluation_results.append([
+        "Stacking Classifier",
+        train_score, train_precision, train_recall, train_f1, train_auc,
+        test_score, precision, recall, f1, roc_auc
+    ])
 train_stacking_model(X_train, y_train, X_test, y_test)
 
-#train bagging model as a test
-from sklearn.ensemble import BaggingClassifier  
+from sklearn.ensemble import BaggingClassifier
+from sklearn.tree import DecisionTreeClassifier
+
 def train_bagging_model(X_train, y_train, X_test, y_test):
-    """Train and evaluate a bagging classifier."""
     base_model = DecisionTreeClassifier(random_state=42)
-    bagging = BaggingClassifier(base_estimator=base_model, n_estimators=50, random_state=42)
+    bagging = BaggingClassifier(estimator=base_model, n_estimators=50, random_state=42)
     bagging.fit(X_train, y_train)
+
+    print("Bagging Classifier")
+
     train_score = bagging.score(X_train, y_train)
-    test_score = bagging.score(X_test, y_test)
-    print(f" Bagging Model Train Accuracy: {train_score:.4f}, Test Accuracy: {test_score:.4f}")
+    test_score  = bagging.score(X_test, y_test)
+
+    from sklearn.metrics import precision_score, recall_score, f1_score, roc_auc_score, confusion_matrix, roc_curve
+    import matplotlib.pyplot as plt, seaborn as sns
+    import numpy as np
+
+    y_pred = bagging.predict(X_test)
+
+    try:
+        y_prob = bagging.predict_proba(X_test)[:, 1]
+    except:
+        y_prob = y_pred
+
+    precision = precision_score(y_test, y_pred, zero_division=0)
+    recall    = recall_score(y_test, y_pred, zero_division=0)
+    f1        = f1_score(y_test, y_pred, zero_division=0)
+    roc_auc   = roc_auc_score(y_test, y_prob)
+
+    cm = confusion_matrix(y_test, y_pred)
+    plt.figure(figsize=(4,3))
+    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues')
+    plt.title("Bagging Classifier - Confusion Matrix")
+    plt.xlabel("Predicted")
+    plt.ylabel("Actual")
+    plt.tight_layout()
+    plt.show()
+
+    fpr, tpr, _ = roc_curve(y_test, y_prob)
+    plt.figure(figsize=(5,4))
+    plt.plot(fpr, tpr, label=f"AUC = {roc_auc:.3f}")
+    plt.plot([0,1], [0,1], 'k--')
+    plt.xlabel("False Positive Rate")
+    plt.ylabel("True Positive Rate")
+    plt.title("Bagging Classifier - ROC Curve")
+    plt.legend()
+    plt.tight_layout()
+    plt.show()
+
+    roc_data["Bagging Classifier"] = (fpr, tpr, roc_auc)
+
+    # ==== TRAIN METRICS ====
+    y_train_pred = bagging.predict(X_train)
+    try:
+        y_train_prob = bagging.predict_proba(X_train)[:, 1]
+        train_auc = roc_auc_score(y_train, y_train_prob)
+    except:
+        train_auc = float('nan')
+
+    train_precision = precision_score(y_train, y_train_pred, zero_division=0)
+    train_recall    = recall_score(y_train, y_train_pred, zero_division=0)
+    train_f1        = f1_score(y_train, y_train_pred, zero_division=0)
+
+    print(f" Train Accuracy: {train_score:.4f}, Test Accuracy: {test_score:.4f}")
+    print(f" Train Precision: {train_precision:.4f}, Test Precision: {precision:.4f}")
+    print(f" Train Recall: {train_recall:.4f}, Test Recall: {recall:.4f}")
+    print(f" Train F1 Score: {train_f1:.4f}, Test F1 Score: {f1:.4f}")
+    print(f" Train ROC-AUC: {train_auc:.4f}, Test ROC-AUC: {roc_auc:.4f}")
+
+    model_results.append(["Bagging Classifier", test_score])
+
+    evaluation_results.append([
+        "Bagging Classifier",
+        train_score, train_precision, train_recall, train_f1, train_auc,
+        test_score, precision, recall, f1, roc_auc
+    ])
 train_bagging_model(X_train, y_train, X_test, y_test)
 
-
-
-
-
-
-
-#train mlp model as a test
 from sklearn.neural_network import MLPClassifier
+
 def train_mlp(X_train, y_train, X_test, y_test):
-    """Train and evaluate a Multi-Layer Perceptron classifier."""
-    model = MLPClassifier(hidden_layer_sizes=(100, ), max_iter=300, random_state=42)
+    model = MLPClassifier(hidden_layer_sizes=(100,), max_iter=300, random_state=42)
     model.fit(X_train, y_train)
+
+    print("MLP Classifier")
+
     train_score = model.score(X_train, y_train)
-    test_score = model.score(X_test, y_test)
-    print(f" MLP Classifier Train Accuracy: {train_score:.4f}, Test Accuracy: {test_score:.4f}")
+    test_score  = model.score(X_test, y_test)
+
+    from sklearn.metrics import precision_score, recall_score, f1_score, roc_auc_score, confusion_matrix, roc_curve
+    import matplotlib.pyplot as plt, seaborn as sns
+    import numpy as np
+
+    y_pred = model.predict(X_test)
+
+    try:
+        y_prob = model.predict_proba(X_test)[:, 1]
+    except:
+        try:
+            y_prob = model.decision_function(X_test)
+        except:
+            y_prob = y_pred
+
+    precision = precision_score(y_test, y_pred, zero_division=0)
+    recall    = recall_score(y_test, y_pred, zero_division=0)
+    f1        = f1_score(y_test, y_pred, zero_division=0)
+    roc_auc   = roc_auc_score(y_test, y_prob)
+
+    cm = confusion_matrix(y_test, y_pred)
+    plt.figure(figsize=(4,3))
+    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues')
+    plt.title("MLP Classifier - Confusion Matrix")
+    plt.xlabel("Predicted")
+    plt.ylabel("Actual")
+    plt.tight_layout()
+    plt.show()
+
+    fpr, tpr, _ = roc_curve(y_test, y_prob)
+    plt.figure(figsize=(5,4))
+    plt.plot(fpr, tpr, label=f"AUC = {roc_auc:.3f}")
+    plt.plot([0,1], [0,1], 'k--')
+    plt.xlabel("False Positive Rate")
+    plt.ylabel("True Positive Rate")
+    plt.title("MLP Classifier - ROC Curve")
+    plt.legend()
+    plt.tight_layout()
+    plt.show()
+
+    roc_data["MLP Classifier"] = (fpr, tpr, roc_auc)
+
+    # ==== TRAIN METRICS ====
+    y_train_pred = model.predict(X_train)
+
+    try:
+        y_train_prob = model.predict_proba(X_train)[:, 1]
+        train_auc = roc_auc_score(y_train, y_train_prob)
+    except:
+        train_auc = float('nan')
+
+    train_precision = precision_score(y_train, y_train_pred, zero_division=0)
+    train_recall    = recall_score(y_train, y_train_pred, zero_division=0)
+    train_f1        = f1_score(y_train, y_train_pred, zero_division=0)
+
+    print(f" Train Accuracy: {train_score:.4f}, Test Accuracy: {test_score:.4f}")
+    print(f" Train Precision: {train_precision:.4f}, Test Precision: {precision:.4f}")
+    print(f" Train Recall: {train_recall:.4f}, Test Recall: {recall:.4f}")
+    print(f" Train F1 Score: {train_f1:.4f}, Test F1 Score: {f1:.4f}")
+    print(f" Train ROC-AUC: {train_auc:.4f}, Test ROC-AUC: {roc_auc:.4f}")
+
+    model_results.append(["MLP Classifier", test_score])
+
+    evaluation_results.append([
+        "MLP Classifier",
+        train_score, train_precision, train_recall, train_f1, train_auc,
+        test_score, precision, recall, f1, roc_auc
+    ])
 train_mlp(X_train, y_train, X_test, y_test)
 
-#train simple neural network model as a test
 import tensorflow as tf
+
 def train_simple_nn(X_train, y_train, X_test, y_test):
-    """Train and evaluate a simple neural network using TensorFlow/Keras."""
     model = tf.keras.Sequential([
         tf.keras.layers.Dense(64, activation='relu', input_shape=(X_train.shape[1],)),
         tf.keras.layers.Dense(32, activation='relu'),
         tf.keras.layers.Dense(1, activation='sigmoid')
     ])
+
     model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
     model.fit(X_train, y_train, epochs=20, batch_size=32, verbose=0)
+
+    print("Simple ANN")
+
+    # Train/Test Accuracy
     train_loss, train_acc = model.evaluate(X_train, y_train, verbose=0)
-    test_loss, test_acc = model.evaluate(X_test, y_test, verbose=0)
-    print(f" Simple NN Train Accuracy: {train_acc:.4f}, Test Accuracy: {test_acc:.4f}")
+    test_loss,  test_acc  = model.evaluate(X_test, y_test, verbose=0)
+
+    from sklearn.metrics import precision_score, recall_score, f1_score, roc_auc_score, confusion_matrix, roc_curve
+    import matplotlib.pyplot as plt, seaborn as sns
+    import numpy as np
+
+    # Test predictions
+    y_prob = model.predict(X_test).ravel()
+    y_pred = (y_prob >= 0.5).astype(int)
+
+    precision = precision_score(y_test, y_pred, zero_division=0)
+    recall    = recall_score(y_test, y_pred, zero_division=0)
+    f1        = f1_score(y_test, y_pred, zero_division=0)
+    roc_auc   = roc_auc_score(y_test, y_prob)
+
+    # Confusion Matrix
+    cm = confusion_matrix(y_test, y_pred)
+    plt.figure(figsize=(4,3))
+    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues')
+    plt.title("Simple ANN - Confusion Matrix")
+    plt.xlabel("Predicted")
+    plt.ylabel("Actual")
+    plt.tight_layout()
+    plt.show()
+
+    # ROC Curve
+    fpr, tpr, _ = roc_curve(y_test, y_prob)
+    plt.figure(figsize=(5,4))
+    plt.plot(fpr, tpr, label=f"AUC = {roc_auc:.3f}")
+    plt.plot([0,1], [0,1], 'k--')
+    plt.xlabel("False Positive Rate")
+    plt.ylabel("True Positive Rate")
+    plt.title("Simple ANN - ROC Curve")
+    plt.legend()
+    plt.tight_layout()
+    plt.show()
+
+    roc_data["Simple ANN"] = (fpr, tpr, roc_auc)
+
+    # ==== TRAIN METRICS ====
+    y_train_prob = model.predict(X_train).ravel()
+    y_train_pred = (y_train_prob >= 0.5).astype(int)
+
+    train_precision = precision_score(y_train, y_train_pred, zero_division=0)
+    train_recall    = recall_score(y_train, y_train_pred, zero_division=0)
+    train_f1        = f1_score(y_train, y_train_pred, zero_division=0)
+
+    try:
+        train_auc = roc_auc_score(y_train, y_train_prob)
+    except:
+        train_auc = float('nan')
+
+    print(f" Train Accuracy: {train_acc:.4f}, Test Accuracy: {test_acc:.4f}")
+    print(f" Train Precision: {train_precision:.4f}, Test Precision: {precision:.4f}")
+    print(f" Train Recall: {train_recall:.4f}, Test Recall: {recall:.4f}")
+    print(f" Train F1 Score: {train_f1:.4f}, Test F1 Score: {f1:.4f}")
+    print(f" Train ROC-AUC: {train_auc:.4f}, Test ROC-AUC: {roc_auc:.4f}")
+
+    model_results.append(["Simple ANN", test_acc])
+
+    evaluation_results.append([
+        "Simple ANN",
+        train_acc, train_precision, train_recall, train_f1, train_auc,
+        test_acc, precision, recall, f1, roc_auc
+    ])
 train_simple_nn(X_train, y_train, X_test, y_test)
 
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+acc_df = pd.DataFrame(model_results, columns=["Model", "Testing Accuracy"])
+
+display(acc_df.sort_values(by="Testing Accuracy", ascending=False))
+
+plt.figure(figsize=(12,6))
+sns.barplot(data=acc_df.sort_values(by="Testing Accuracy", ascending=False),
+            x="Model", y="Testing Accuracy", palette="viridis")
+plt.title("Model Comparison – Testing Accuracy")
+plt.xticks(rotation=45, ha='right')
+plt.tight_layout()
+plt.show()
+
+import pandas as pd
+
+columns = [
+    "Model",
+    "Train Accuracy", "Train Precision", "Train Recall", "Train F1 Score", "Train ROC-AUC",
+    "Test Accuracy", "Test Precision", "Test Recall", "Test F1 Score", "Test ROC-AUC"
+]
+
+eval_df = pd.DataFrame(evaluation_results, columns=columns)
+
+# Sort by highest test accuracy
+eval_df = eval_df.sort_values(by="Test Accuracy", ascending=False)
+
+display(eval_df.style.background_gradient(cmap='Blues'))
