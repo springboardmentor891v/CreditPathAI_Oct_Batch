@@ -1,0 +1,7 @@
+,Model,Train Accuracy,Train Sensitivity,Train Specificity,Train Precision,Train F1,Test Accuracy,Test Sensitivity,Test Specificity,Test Precision,Test F1
+0,Logistic Regression,83.1,65.85,88.74,65.67,65.76,83.54,67.24,88.88,66.41,66.82
+1,Decision Tree,99.99,100.0,99.99,99.97,99.98,99.97,100.0,99.96,99.89,99.95
+2,Random Forest,99.98,100.0,99.97,99.91,99.96,99.98,100.0,99.97,99.9,99.95
+3,Naive Bayes,86.99,47.21,100.0,100.0,64.14,87.5,49.29,100.0,100.0,66.03
+4,Linear SVM,83.27,63.59,89.71,66.89,65.2,83.77,65.07,89.88,67.78,66.39
+5,XGBoost,100.0,100.0,99.99,99.98,99.99,99.99,100.0,99.99,99.96,99.98
