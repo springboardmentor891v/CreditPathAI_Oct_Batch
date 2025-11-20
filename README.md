@@ -23,11 +23,3 @@ Describe train/test split (80/20, stratified)
 Metrics: Accuracy, Precision, Recall, F1, Confusion Matrix
 Show main results table (from final_comp)
 
-
-   
-
-Which model worked best on Loan Default?
-
-Which worked best on Microsoft dataset?
-
-Discuss trade-offs (accuracy vs. training time vs. interpretability).
