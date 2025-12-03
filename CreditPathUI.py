@@ -8,9 +8,8 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-
+import plotly.express as px
 import streamlit as st
-
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler, OneHotEncoder, LabelEncoder
 from sklearn.feature_selection import VarianceThreshold, SelectKBest, mutual_info_classif
@@ -36,6 +35,9 @@ except Exception:
     XGB_AVAILABLE = False
 
 # ------------------- Page & Theme -------------------
+if "busy" not in st.session_state:
+    st.session_state["busy"] = False
+
 
 st.set_page_config(
     page_title="Loan Default ML Studio",
@@ -299,6 +301,12 @@ if "trained" not in st.session_state and os.path.exists("trained_models.pkl"):
 # ------------------- Sidebar -------------------
 
 with st.sidebar:
+
+    uploaded_file = st.file_uploader("📤 Upload your CSV dataset (optional)", type=["csv"])
+
+    if uploaded_file is not None:
+        df = pd.read_csv(uploaded_file)
+        st.session_state["df"] = df
     
     st.markdown("**Steps:**")
     st.markdown("1. Preprocess data\n2. Select models\n3. Train\n4. Predict & compare")
@@ -306,23 +314,54 @@ with st.sidebar:
     st.markdown("---")
 
     selected_models = st.multiselect(
-        "Select Models",
-        options=list(make_model_dict().keys()),
-        default=["Logistic Regression", "Random Forest"]
-    )
+    "Select Models",
+    options=list(make_model_dict().keys()),
+    default=[]
+)
 
-    btn_preprocess = st.button("🔄 Preprocess Data")
-    btn_train = st.button("⚙️ Train Models")
-    btn_predict = st.button("📊 Predict & Compare")
+    btn_preprocess = st.button("🔄 Preprocess Data", disabled=st.session_state["busy"])
+    btn_train     = st.button("⚙️ Train Models", disabled=st.session_state["busy"])
+    btn_predict = st.button("📊 Predict & Compare", disabled=not st.session_state.get("trained", False))
+
 
 # ------------------- Main Layout -------------------
 
 st.title("📈 Loan Default Risk Prediction")
 st.caption("Simple ML dashboard for predicting loan default risk using various models.")
+st.markdown("""
+<div style="
+    background: linear-gradient(90deg, #0ea5e9, #2563eb);
+    padding: 16px;
+    border-radius: 10px;
+    color: white;
+    margin-bottom: 18px;
+">
+<h3>📌 Project: AI-Based Loan Default Prediction & Recovery Recommendation System</h3>
+<p>
+To design and develop a machine learning–driven platform that predicts borrower loan default risk and recommends personalized recovery actions.
+The system uses open-source technologies to ensure cost-effectiveness, scalability, and reliability — empowering financial institutions and collection agents with actionable insights, improved delinquency recovery efficiency, and enhanced borrower optimization.
+</p>
+</div>
+""", unsafe_allow_html=True)
+
 
 # ---------- Load data and show basic info ----------
 
-data, used_path = load_dataset()
+# ------------------- LOAD DATA -------------------
+data = None
+used_path = None
+
+if uploaded_file:
+    try:
+        data = pd.read_csv(uploaded_file)
+        used_path = f"(User Uploaded) {uploaded_file.name}"
+        st.success(f"📥 Using uploaded dataset: {uploaded_file.name}")
+    except Exception:
+        st.error("❌ Invalid CSV format. Please upload a valid dataset.")
+else:
+    data, used_path = load_dataset()
+    st.info("📦 Using default dataset (Loan_Default.csv)")
+
 if data is not None:
     col1, col2, col3 = st.columns(3)
     with col1:
@@ -337,113 +376,213 @@ if data is not None:
         st.write(f"Loaded from: `{used_path}`")
         st.dataframe(data.head())
 
+required_target = "Status"
+if required_target not in data.columns:
+    st.error(f"❗ Dataset must contain target column `{required_target}`")
+    st.stop()
+
 # ---------- Preprocessing step ----------
 
-if btn_preprocess:
-    if data is None:
-        st.error("Dataset not found. Fix the path and reload.")
-    else:
-        with st.spinner("Preprocessing data..."):
-            data_clean = basic_clean(data)
-            Xtr_sel, Xte_sel, y_train_bal, y_test, artifacts = preprocess(data_clean)
-            st.session_state["preprocessed"] = {
-                "Xtr_sel": Xtr_sel,
-                "Xte_sel": Xte_sel,
-                "y_train_bal": y_train_bal,
-                "y_test": y_test,
-                "artifacts": artifacts,
-            }
-            joblib.dump(st.session_state["preprocessed"], "preprocessed.pkl")
-        st.success("Preprocessing complete ✅")
+# ------------------- PREPROCESS STEP -------------------
+if btn_preprocess and not st.session_state["busy"]:
+    st.session_state["busy"] = True
+    try:
+        if data is None:
+            st.error("⚠️ Dataset not found.")
+        else:
+            with st.spinner("🔄 Preprocessing data..."):
+                data_clean = basic_clean(data)
+
+                # user or default dataset both flow here
+                Xtr_sel, Xte_sel, y_train_bal, y_test, artifacts = preprocess(data_clean)
+
+                st.session_state["preprocessed"] = {
+                    "Xtr_sel": Xtr_sel,
+                    "Xte_sel": Xte_sel,
+                    "y_train_bal": y_train_bal,
+                    "y_test": y_test,
+                    "artifacts": artifacts,
+                    "dataset_name": used_path,
+                }
+
+                # ---------- Baseline Model to measure preprocessing ----------
+                baseline = LogisticRegression(max_iter=1500)
+                baseline.fit(Xtr_sel, y_train_bal)
+                pred = baseline.predict(Xte_sel)
+
+                st.session_state["preprocess_acc"] = accuracy_score(y_test, pred)
+                st.session_state["preprocess_f1"] = f1_score(y_test, pred)
+
+            st.success("✨ Preprocessing completed!")
+    finally:
+        st.session_state["busy"] = False
+    if "preprocess_acc" in st.session_state:
+        st.markdown("### ⚙️ Preprocessing Performance (Baseline Model)")
+        st.metric("Accuracy", round(st.session_state["preprocess_acc"], 3))
+        st.metric("F1 Score", round(st.session_state["preprocess_f1"], 3))
+
+# Show preview of preprocessing results
+
+    pp = st.session_state["preprocessed"]
+
+    st.markdown("### 🧠 Preprocessing Summary")
+
+    col1, col2, col3 = st.columns(3)
+    col1.metric("Train Rows", len(pp["y_train_bal"]))
+    col2.metric("Test Rows", len(pp["y_test"]))
+    col3.metric("Features", pp["Xtr_sel"].shape[1])
+
+    st.caption(f"📦 Dataset Source: **{pp['dataset_name']}**")
+    st.markdown(f"📂 **Current Dataset:** `{used_path}`")
+
 
 # ---------- Training step ----------
 
-if btn_train:
+# ------------------- TRAINING STEP -------------------
+if btn_train and not st.session_state["busy"]:
+
     if "preprocessed" not in st.session_state:
-        st.warning("Please preprocess the data first.")
+        st.error("⚠️ Please preprocess the data first.")
     elif len(selected_models) == 0:
-        st.warning("Please select at least one model.")
+        st.error("⚠️ Please select at least one model.")
     else:
-        with st.spinner("Training selected models..."):
-            Xtr_sel = st.session_state["preprocessed"]["Xtr_sel"]
-            Xte_sel = st.session_state["preprocessed"]["Xte_sel"]
-            y_train_bal = st.session_state["preprocessed"]["y_train_bal"]
-            y_test = st.session_state["preprocessed"]["y_test"]
+        st.session_state["busy"] = True
+        try:
+            pp = st.session_state["preprocessed"]
+            Xtr_sel = pp["Xtr_sel"]
+            Xte_sel = pp["Xte_sel"]
+            y_train_bal = pp["y_train_bal"]
+            y_test = pp["y_test"]
 
             all_models = make_model_dict()
             trained_models = {}
-            rows = []
             conf_mats = {}
 
-            for name in selected_models:
-                model = all_models[name]
-                model.fit(Xtr_sel, y_train_bal)
+            train_rows = []
+            test_rows = []
 
-                y_pred = model.predict(Xte_sel)
-                y_proba = model.predict_proba(Xte_sel)[:, 1] if hasattr(model, "predict_proba") else None
+            with st.spinner("⚙️ Training models..."):
+                for name in selected_models:
+                    model = all_models[name]
+                    model.fit(Xtr_sel, y_train_bal)
 
-                metrics = get_metrics(y_test, y_pred, y_proba)
-                conf_mats[name] = metrics["ConfusionMatrix"]
+                    # ---------------- TRAIN METRICS ----------------
+                    y_pred_tr = model.predict(Xtr_sel)
+                    y_proba_tr = model.predict_proba(Xtr_sel)[:,1] if hasattr(model,'predict_proba') else None
+                    mtr = get_metrics(y_train_bal, y_pred_tr, y_proba_tr)
 
-                rows.append({
-                    "Model": name,
-                    "Accuracy": metrics["Accuracy"],
-                    "Sensitivity": metrics["Sensitivity"],
-                    "Precision": metrics["Precision"],
-                    "Specificity": metrics["Specificity"],
-                    "F1": metrics["F1"],
-                    "AUC": metrics["AUC"],
-                })
-                trained_models[name] = model
+                    train_rows.append({
+                        "Model": name,
+                        "Accuracy": mtr["Accuracy"],
+                        "Precision": mtr["Precision"],
+                        "Sensitivity": mtr["Sensitivity"],
+                        "Specificity": mtr["Specificity"],
+                        "F1": mtr["F1"],
+                        "AUC": mtr["AUC"],
+                    })
 
-            metrics_df = pd.DataFrame(rows)
+                    # ---------------- TEST METRICS ----------------
+                    y_pred_te = model.predict(Xte_sel)
+                    y_proba_te = model.predict_proba(Xte_sel)[:,1] if hasattr(model,'predict_proba') else None
+                    mte = get_metrics(y_test, y_pred_te, y_proba_te)
 
-            st.session_state["trained"] = True
-            st.session_state["metrics_df"] = metrics_df
-            st.session_state["conf_mats"] = conf_mats
+                    test_rows.append({
+                        "Model": name,
+                        "Accuracy": mte["Accuracy"],
+                        "Precision": mte["Precision"],
+                        "Sensitivity": mte["Sensitivity"],
+                        "Specificity": mte["Specificity"],
+                        "F1": mte["F1"],
+                        "AUC": mte["AUC"],
+                    })
+
+                    conf_mats[name] = mte["ConfusionMatrix"]
+                    trained_models[name] = model
+
+            # SAVE TO SESSION 👇 MOST IMPORTANT
+            st.session_state["train_table"] = pd.DataFrame(train_rows)
+            st.session_state["test_table"] = pd.DataFrame(test_rows)
             st.session_state["trained_models"] = trained_models
+            st.session_state["conf_mats"] = conf_mats
+            st.session_state["trained"] = True
 
-            # Save to disk so state survives refresh
-            joblib.dump(
-                {
-                    "trained": True,
-                    "metrics_df": metrics_df,
-                    "conf_mats": conf_mats,
-                    "trained_models": trained_models,
-                },
-                "trained_models.pkl"
-            )
+            st.success("🎯 Training Complete!")
 
-        st.success("Training complete ✅")
+        finally:
+            st.session_state["busy"] = False
 
-# ---------- Prediction / Comparison step ----------
-if btn_predict or ("trained" in st.session_state and st.session_state["trained"] and not btn_train):
-    if "metrics_df" not in st.session_state:
-        st.info("Train models first to see comparison.")
-    else:
-        st.subheader("Model Performance Comparison")
+
+
+
+        st.markdown("### 📚 Training Results Overview")
 
         metrics_df = st.session_state["metrics_df"]
         st.dataframe(metrics_df.round(3), use_container_width=True)
 
+        best_row = metrics_df.sort_values("Accuracy", ascending=False).iloc[0]
+
+        st.markdown(f"""
+🎯 **Best Model so far:**  
+💡 **{best_row['Model']}**  
+🏆 **Accuracy:** `{best_row['Accuracy']:.3f}`
+        """)
+
+
+# ---------- Prediction / Comparison step ----------
+# ------------------- PREDICT & COMPARE -------------------
+if btn_predict:
+
+    if "train_table" not in st.session_state or "test_table" not in st.session_state:
+        st.error("⚠️ Train models first.")
+    else:
+        st.subheader("📊 Model Performance Overview")
+
+        col1, col2 = st.columns(2)
+
+        with col1:
+            st.markdown("### 🏋️ Training Metrics")
+            st.dataframe(st.session_state["train_table"].round(3), use_container_width=True)
+
+        with col2:
+            st.markdown("### 🧪 Testing Metrics")
+            st.dataframe(st.session_state["test_table"].round(3), use_container_width=True)
+
+# ====================================
+#  Overfit / Underfit Risk Analysis
+# ====================================
+
+        df_compare = st.session_state["train_table"].merge(
+    st.session_state["test_table"],
+    on="Model",
+    suffixes=("_Train", "_Test")
+        )
+
+        df_compare["Accuracy_Gap"] = df_compare["Accuracy_Train"] - df_compare["Accuracy_Test"]
+        df_compare["F1_Gap"] = df_compare["F1_Train"] - df_compare["F1_Test"]
+
+        st.markdown("### ⚠️ Model Generalization Report")
+        st.dataframe(df_compare.round(3), use_container_width=True)
+
+
+
+
         # ------------------- Smaller Bar Plot -------------------
-        metrics_long = metrics_df.melt(id_vars="Model", var_name="Metric", value_name="Score")
+    metrics_long = df_compare.melt(id_vars="Model", var_name="Metric", value_name="Score")
 
-        fig, ax = plt.subplots(figsize=(8, 4))  # smaller
-        sns.barplot(data=metrics_long, x="Model", y="Score", hue="Metric", ax=ax)
-        ax.set_ylim(0, 1.05)
-        ax.set_ylabel("Score")
-        ax.set_title("Model Metrics Comparison")
-        plt.xticks(rotation=45, ha="right")
-        plt.tight_layout()
-        st.pyplot(fig)
+    fig, ax = plt.subplots(figsize=(8, 4))  # smaller
+    sns.barplot(data=metrics_long, x="Model", y="Score", hue="Metric", ax=ax)
+    ax.set_ylim(0, 1.05)
+    ax.set_ylabel("Score")
+    ax.set_title("Model Metrics Comparison")
+    plt.xticks(rotation=45, ha="right")
+    plt.tight_layout()
+    st.pyplot(fig)
+    st.markdown("### Confusion Matrices")
 
-        st.markdown("### Confusion Matrices")
+    conf_mats = st.session_state["conf_mats"]
+    names = list(conf_mats.keys())
 
-        conf_mats = st.session_state["conf_mats"]
-        names = list(conf_mats.keys())
-
-        for i in range(0, len(names), 2):
+    for i in range(0, len(names), 2):
             row = names[i: i + 2]            
             cm1 = conf_mats[row[0]]
             cm2 = conf_mats[row[1]] if len(row) > 1 else None
@@ -476,9 +615,25 @@ if btn_predict or ("trained" in st.session_state and st.session_state["trained"]
         
 
         # ------------------- Quick Prediction -------------------
-        st.subheader("Quick Prediction Demo (Random Test Row)")
+    st.subheader("Quick Prediction Demo (Random Test Row)")
+    st.markdown("---")
+    st.subheader("📌 Model Evaluation Summary")
 
-        if "preprocessed" in st.session_state and "trained_models" in st.session_state:
+    best_row = st.session_state["metrics_df"].sort_values("Accuracy", ascending=False).iloc[0]
+    st.markdown(f"""
+### 🏅 Best Performing Model
+
+- **Model:** `{best_row["Model"]}`
+- **Accuracy:** `{best_row["Accuracy"]:.3f}`
+- **F1 Score:** `{best_row["F1"]:.3f}`
+- **Sensitivity (Recall):** `{best_row["Sensitivity"]:.3f}`
+- **Precision:** `{best_row["Precision"]:.3f}`
+- **Specificity:** `{best_row["Specificity"]:.3f}`
+- **AUC:** `{best_row["AUC"]:.3f}`
+""")
+
+
+    if "preprocessed" in st.session_state and "trained_models" in st.session_state:
             Xte_sel = st.session_state["preprocessed"]["Xte_sel"]
             y_test = st.session_state["preprocessed"]["y_test"]
             idx = np.random.randint(0, Xte_sel.shape[0])
@@ -499,16 +654,16 @@ if btn_predict or ("trained" in st.session_state and st.session_state["trained"]
         # ----------------------------------------------------------
         #             ROC + Precision Recall Comparison
         # ----------------------------------------------------------
-        st.markdown("---")
-        st.subheader("📈 ROC & Precision-Recall Comparison")
+    st.markdown("---")
+    st.subheader("📈 ROC & Precision-Recall Comparison")
 
-        from sklearn.metrics import roc_curve, auc, precision_recall_curve, average_precision_score
+    from sklearn.metrics import roc_curve, auc, precision_recall_curve, average_precision_score
 
-        models = st.session_state["trained_models"]
+    models = st.session_state["trained_models"]
 
         # ---------- ROC ----------
-        fig3, ax3 = plt.subplots(figsize=(6,4))
-        for name, model in models.items():
+    fig3, ax3 = plt.subplots(figsize=(6,4))
+    for name, model in models.items():
             if hasattr(model, "predict_proba"):
                 y_score = model.predict_proba(Xte_sel)[:, 1]
             elif hasattr(model, "decision_function"):
@@ -519,16 +674,15 @@ if btn_predict or ("trained" in st.session_state and st.session_state["trained"]
             roc_auc = auc(fpr, tpr)
             ax3.plot(fpr, tpr, lw=2, label=f"{name} (AUC={roc_auc:.3f})")
 
-        ax3.plot([0, 1], [0, 1], "k--", lw=1)
-        ax3.set_title("ROC Curve")
-        ax3.set_xlabel("False Positive Rate")
-        ax3.set_ylabel("True Positive Rate")
-        ax3.legend(loc="lower right")
-        plt.tight_layout()
-
+    ax3.plot([0, 1], [0, 1], "k--", lw=1)
+    ax3.set_title("ROC Curve")
+    ax3.set_xlabel("False Positive Rate")
+    ax3.set_ylabel("True Positive Rate")
+    ax3.legend(loc="lower right")
+    plt.tight_layout()
         # ---------- Precision–Recall ----------
-        fig4, ax4 = plt.subplots(figsize=(6,4))
-        for name, model in models.items():
+    fig4, ax4 = plt.subplots(figsize=(6,4))
+    for name, model in models.items():
             if hasattr(model, "predict_proba"):
                 y_score = model.predict_proba(Xte_sel)[:, 1]
             elif hasattr(model, "decision_function"):
@@ -539,18 +693,16 @@ if btn_predict or ("trained" in st.session_state and st.session_state["trained"]
             ap = average_precision_score(y_test, y_score)
             ax4.plot(recall, precision, lw=2, label=f"{name} (AP={ap:.3f})")
 
-        ax4.set_title("Precision–Recall Curve")
-        ax4.set_xlabel("Recall")
-        ax4.set_ylabel("Precision")
-        ax4.legend(loc="lower left")
-        plt.tight_layout()
-
-        colROC, colPR = st.columns(2)
-        with colROC:
-            st.pyplot(fig3)
-        with colPR:
-            st.pyplot(fig4)
-
+    ax4.set_title("Precision–Recall Curve")
+    ax4.set_xlabel("Recall")
+    ax4.set_ylabel("Precision")
+    ax4.legend(loc="lower left")
+    plt.tight_layout()
+    colROC, colPR = st.columns(2)
+    with colROC:
+        st.pyplot(fig3)
+    with colPR:
+        st.pyplot(fig4)
 # ---------- Save best model (for later use) ----------
 
 if "metrics_df" in st.session_state and "trained_models" in st.session_state:
@@ -569,4 +721,18 @@ if "metrics_df" in st.session_state and "trained_models" in st.session_state:
         }
         joblib.dump(payload, "PurviModel.joblib")
 
-    st.info(f"Best model right now: **{best_model_name}** (saved as PurviModel.joblib)")
+        st.info(f"Best model right now: **{best_model_name}** (saved as PurviModel.joblib)")
+
+    st.markdown("""<style>
+.block-container {
+    padding-top: 1.3rem;
+    padding-left: 2.2rem;
+    padding-right: 2.2rem;
+}
+
+.dataframe tbody tr:hover {
+    background-color: #1e293b !important;
+}
+</style>
+
+""", unsafe_allow_html=True)
