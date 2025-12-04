@@ -5,8 +5,6 @@ import joblib
 import matplotlib.pyplot as plt
 import seaborn as sns
 from datetime import datetime
-
-# ============ PAGE CONFIGURATION ============
 st.set_page_config(
     page_title="Credit Path AI - Advanced Loan Risk Assessment",
     page_icon="💰",
@@ -14,7 +12,6 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# ============ CUSTOM CSS ============
 st.markdown("""
     <style>
         .main-header {
@@ -67,7 +64,6 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# ============ LOAD MODEL AND SCALER ============
 @st.cache_resource
 def load_model_and_scaler():
     try:
@@ -80,7 +76,6 @@ def load_model_and_scaler():
 
 model, scaler = load_model_and_scaler()
 
-# ============ FEATURE NAMES (CORE 7) ============
 CORE_FEATURES = [
     'age',
     'income',
@@ -91,13 +86,13 @@ CORE_FEATURES = [
     'debt_to_income_ratio'
 ]
 
-# ============ HEADER ============
+
 st.markdown('<h1 class="main-header">💰 Credit Path AI - Advanced</h1>', unsafe_allow_html=True)
 st.markdown('<h3 style="text-align: center; color: #666;">Comprehensive Loan Risk Assessment System</h3>', unsafe_allow_html=True)
 
 st.markdown("""
 ---
-**🔍 About This Advanced App:**
+**🔍 About This  App:**
 This enhanced version includes 15+ input features for more comprehensive risk assessment.
 Uses XGBoost with 87.5% accuracy on German Credit Dataset.
 
@@ -573,4 +568,5 @@ st.markdown("""
     <p>Comprehensive Loan Default Prediction System</p>
     <p>⚠️ This model is for educational purposes. Seek professional financial advice for actual lending decisions.</p>
 </div>
+
 """, unsafe_allow_html=True)
