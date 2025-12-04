@@ -4,5 +4,5 @@ To design and develop a machine learning–driven platform that predicts borrowe
 
 ================== NOTE==================
 
-The earlier development branch was removed due to repository restructuring and cleanup. All initial work was consolidated into the current branch to maintain a stable workflow and avoid legacy conflicts.
+The earlier development branch was deleted due to repository restructuring and cleanup. All initial work was consolidated into the current branch to maintain a stable workflow and avoid legacy conflicts.
 This change was communicated to the mentor, and the project continues from the same starting point with full transparency for evaluation purposes.
