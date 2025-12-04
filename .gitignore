@@ -1,0 +1,18 @@
+__pycache__/
+*.pyc
+.env
+.env.*
+.ipynb_checkpoints/
+*.log
+.DS_Store
+/.venv/
+/venv/
+/env/
+.vscode/
+.idea/
+*.sqlite3
+# optionally avoid committing heavy notebooks if you want:
+# *.ipynb
+# ignore model folders only if you plan to keep them outside git
+# microsoft_dataset/models/*
+# kaggle_dataset/models/*
