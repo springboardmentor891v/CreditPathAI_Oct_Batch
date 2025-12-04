@@ -1,0 +1,21 @@
+id,loan_limit,Gender,approv_in_adv,loan_type,loan_purpose,Credit_Worthiness,open_credit,business_or_commercial,Neg_ammortization,interest_only,lump_sum_payment,construction_type,occupancy_type,Secured_by,total_units,credit_type,co-applicant_credit_type,age,submission_of_application,Region,Security_Type,loan_amount,rate_of_interest,Interest_rate_spread,Upfront_charges,term,property_value,income,Credit_Score,LTV,dtir1
+1,cf,Male,nopre,type1,p1,l1,nopc,nob/c,not_neg,not_int,not_lpsm,sb,pr,home,1U,CIB,CIB,35-44,to_inst,North,direct,150000,3,0.1,1000,360,400000,12000,850,37.5,15
+2,cf,Female,nopre,type1,p3,l1,nopc,nob/c,not_neg,not_int,not_lpsm,sb,pr,home,1U,CRIF,EXP,45-54,not_inst,central,direct,250000,4.5,0.5,1500,360,350000,6000,720,71,38
+3,cf,Male,nopre,type1,p4,l1,nopc,nob/c,not_neg,not_int,not_lpsm,sb,pr,home,1U,EXP,CIB,55-64,to_inst,North-East,direct,400000,4,0.3,2000,360,500000,8000,750,80,42
+4,cf,Joint,nopre,type2,p1,l1,nopc,b/c,not_neg,not_int,not_lpsm,sb,pr,home,1U,CIB,CIB,25-34,not_inst,south,direct,300000,3.8,0.2,1200,180,450000,9000,780,66,30
+5,ncf,Sex Not Available,nopre,type1,p3,l1,nopc,nob/c,not_neg,not_int,not_lpsm,mh,sr,land,1U,CRIF,EXP,65-74,to_inst,central,Indriect,100000,5,0.6,500,240,150000,4000,690,66,25
+6,cf,Male,nopre,type1,p1,l1,nopc,nob/c,not_neg,not_int,not_lpsm,sb,pr,home,1U,CIB,CIB,35-44,to_inst,North,direct,220000,3.2,0.15,1100,360,350000,7500,740,62,36
+7,cf,Female,nopre,type2,p3,l1,nopc,b/c,not_neg,not_int,not_lpsm,sb,pr,home,1U,EXP,EXP,45-54,not_inst,south,direct,350000,4.2,0.4,1800,360,420000,6500,710,83,40
+8,cf,Male,pre,type1,p1,l2,opc,nob/c,neg_amm,int_only,not_lpsm,sb,ir,home,2U,EQUI,EXP,<25,to_inst,North-East,direct,550000,6.5,1.5,0,360,600000,3000,600,91,50
+9,cf,Female,pre,type3,p4,l2,opc,nob/c,neg_amm,int_only,lpsm,sb,sr,home,3U,EXP,EXP,>74,not_inst,central,direct,120000,7,2,500,180,130000,1500,550,92,55
+10,ncf,Joint,pre,type2,p3,l2,opc,b/c,neg_amm,int_only,not_lpsm,mh,ir,land,4U,EQUI,EXP,35-44,to_inst,south,Indriect,600000,8,2.5,0,360,610000,2000,500,98,60
+11,cf,Male,pre,type2,p3,l2,opc,b/c,neg_amm,int_only,not_lpsm,mh,ir,land,4U,EXP,EXP,<25,to_inst,south,Indriect,600000,8.5,3,0,360,610000,1000,500,98,60
+12,ncf,Joint,pre,type3,p4,l2,opc,b/c,neg_amm,int_only,lpsm,sb,sr,home,4U,EQUI,EXP,>74,to_inst,North-East,direct,100000,9,5,5000,180,105000,500,400,95,80
+13,cf,Female,nopre,type1,p2,l1,nopc,nob/c,not_neg,not_int,not_lpsm,sb,pr,home,1U,CIB,CIB,35-44,not_inst,North,direct,280000,3.9,0.25,1300,360,350000,6800,730,80,39
+14,cf,Male,pre,type1,p3,l2,opc,nob/c,neg_amm,int_only,lpsm,sb,ir,home,2U,EXP,EXP,55-64,to_inst,central,direct,180000,6,1,0,300,200000,3500,620,90,48
+15,cf,Joint,nopre,type1,p1,l1,nopc,nob/c,not_neg,not_int,not_lpsm,sb,pr,home,1U,CIB,CIB,25-34,to_inst,North,direct,210000,3.1,0.1,900,360,300000,7200,760,70,33
+16,cf,Male,pre,type2,p4,l2,opc,b/c,neg_amm,int_only,not_lpsm,sb,sr,home,1U,CRIF,EXP,45-54,not_inst,south,direct,320000,7.8,2.2,0,360,330000,4100,580,96,52
+17,cf,Female,nopre,type1,p1,l1,nopc,nob/c,not_neg,not_int,not_lpsm,sb,pr,home,1U,CIB,CIB,35-44,to_inst,North-East,direct,260000,3.7,0.2,1400,360,380000,6900,740,68,37
+18,ncf,Joint,pre,type3,p3,l2,opc,b/c,neg_amm,int_only,lpsm,mh,ir,land,4U,EXP,EXP,>74,to_inst,south,Indriect,150000,8.8,4.5,4000,240,160000,1800,480,93,65
+19,cf,Male,nopre,type1,p1,l1,nopc,nob/c,not_neg,not_int,not_lpsm,sb,pr,home,1U,CIB,CIB,35-44,to_inst,North,direct,190000,3.3,0.15,1000,360,250000,5500,710,76,34
+20,cf,Female,pre,type2,p3,l2,opc,b/c,neg_amm,int_only,not_lpsm,sb,ir,home,2U,EXP,EXP,<25,not_inst,central,Indriect,420000,7.2,1.8,0,360,430000,3100,590,97,58
