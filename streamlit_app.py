@@ -1,13 +1,3 @@
-# streamlit_app_combined.py
-"""
-Combined CreditPath AI — Microsoft + Kaggle
-- Select dataset (Microsoft / Kaggle) in sidebar
-- Loads all .joblib/.pkl models in dataset models/ folder
-- Forces uploaded CSV to dataset-specific expected features (missing->0, extra->drop)
-- Single-record manual form (sidebar-selectable fields) or upload 1-row CSV
-- Batch evaluate (preview first row, load into single form, produce predictions, download CSV)
-- Robust predict_proba handling (uses model.classes_), silent AUC inversion to avoid mirrored ROC
-"""
 
 import streamlit as st
 from pathlib import Path
@@ -34,16 +24,12 @@ DATASETS = {
     }
 }
 
-# ---------- EXPECTED FEATURE LISTS ----------
 MICRO_EXPECTED = [
     "memberId","residentialState","yearsEmployment","homeOwnership","annualIncome","incomeVerified",
     "dtiRatio","lengthCreditHistory","numTotalCreditLines","numOpenCreditLines","numOpenCreditLines1Year",
-    "revolvingBalance","revolvingUtilizationRate","numDerogatoryRec","numDelinquency2Years","numChargeoff1year",
-    "numInquiries6Mon","loanId","purpose","isJointApplication","loanAmount","term","interestRate","monthlyPayment",
-    "grade","year","month"
+    "revolvingBalance","revolvingUtilizationRate","numDerogatoryRec","numDelinquency2Years","numChargeoff1year","numInquiries6Mon","loanId","purpose","isJointApplication","loanAmount","term","interestRate","monthlyPayment","grade","year","month"
 ]
 
-# Kaggle expected columns you gave (exact order)
 
 KAGGLE_EXPECTED = [
     'loan_amnt', 'funded_amnt', 'funded_amnt_inv', 'term', 'int_rate', 'installment', 'annual_inc', 'loan_status', 'dti', 'delinq_2yrs', 'inq_last_6mths', 'open_acc', 'pub_rec', 'revol_bal', 'revol_util', 'total_acc', 'total_pymnt', 'total_pymnt_inv', 'total_rec_prncp', 'total_rec_int', 'last_pymnt_amnt', 'emp_length_years', 'home_ownership_1', 'home_ownership_2', 'home_ownership_3', 'home_ownership_4', 'purpose_1', 'purpose_2', 'purpose_3', 'purpose_4', 'purpose_5', 'purpose_6', 'purpose_7', 'purpose_8', 'purpose_9', 'purpose_10', 'purpose_11', 'purpose_12', 'purpose_13', 'verification_status_1', 'verification_status_2'
@@ -159,8 +145,6 @@ if scaler_path.exists():
     except Exception:
         scaler = None
 
-# try to load preprocessor (pipeline) if exists
-# -------- robust preprocessor loader (replace your previous preprocessor-load) --------
 preprocessor = None
 preproc_path = models_dir / "preprocessor_artifacts.joblib"
 
@@ -466,7 +450,7 @@ if uploaded_batch:
         except Exception:
             xgb_expected = None
 
-        # CASE A: model expects expanded preprocessor output (heuristic: n_expected > len(EXPECTED) or booster feature_names length)
+
         needs_expanded = False
         if (isinstance(n_expected, int) and n_expected > len(EXPECTED)) or (isinstance(xgb_expected, (list, tuple)) and len(xgb_expected) > len(EXPECTED)):
             needs_expanded = True
