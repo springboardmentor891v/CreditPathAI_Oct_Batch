@@ -81,11 +81,3 @@ Used confusion matrix to assess defaulter identification accuracy
 🎯 Goal
 
 To empower financial institutions with an intelligent, AI-driven risk management tool that enhances credit decisioning, reduces financial losses, and streamlines the borrower recovery process.
-
-📄 Project Details
-Field	Information
-Project Title	CreditPath AI – Predictive Modeling for Loan Default Risk & Personalized Recovery Strategy
-Mentor	Dr. N. Jagan Mohan
-Internship	Infosys Springboard Internship 6.0
-Developed By	Interns 
-🔗 Important Links
