@@ -1,4 +1,4 @@
-# app_safe_streamlit.py
+# app_safe_streamlit_fixed.py
 
 import streamlit as st
 import pandas as pd
@@ -15,20 +15,16 @@ st.write("Enter applicant details in the sidebar, select a model, and predict de
 
 # --- Available Models ---
 models = {
-    "Logistic Regression": "saved_models/logistic_regression.pkl",
-    "Decision Tree": "saved_models/decision_tree.pkl",
-    "Random Forest": "saved_models/random_forest.pkl",
-    "Gradient Boosting": "saved_models/gradient_boosting.pkl",
-    "KNN": "saved_models/knn.pkl",
-    "Naive Bayes": "saved_models/naive_bayes.pkl",
-    "XGBoost": "saved_models/xgboost.pkl"
+    "Simple Model (Recommended)": "models/simple_model.pkl",
+    "Logistic Regression": "models/logistic_reg.pkl",
+    "Random Forest": "models/random_forest.pkl"
 }
 
 # --- Sidebar Inputs ---
 st.sidebar.header("Enter Applicant Details")
 loan_id = st.sidebar.text_input("Loan ID", "L001")
 loan_amount = st.sidebar.number_input("Loan Amount", min_value=0, step=1000)
-income = st.sidebar.number_input("Annual Income", min_value=0, step=1000)
+income = st.sidebar.number_input("Income", min_value=0, step=1000)
 credit_score = st.sidebar.number_input("Credit Score", min_value=300, max_value=850, step=1)
 age = st.sidebar.number_input("Age", min_value=18, max_value=100, step=1)
 months_employed = st.sidebar.number_input("Months Employed", min_value=0, step=1)
@@ -37,6 +33,12 @@ interest_rate = st.sidebar.number_input("Interest Rate (%)", min_value=0.0, max_
 loan_term = st.sidebar.number_input("Loan Term (months)", min_value=6, max_value=360, step=6)
 dti_ratio = st.sidebar.number_input("Debt-to-Income Ratio (%)", min_value=0.0, max_value=100.0, step=0.1)
 
+# Additional inputs expected by model (placeholders/defaults)
+property_value = st.sidebar.number_input("Property Value", min_value=0, step=1000, value=100000)
+upfront_charges = st.sidebar.number_input("Upfront Charges", min_value=0, step=100, value=500)
+ltv = st.sidebar.number_input("Loan-to-Value Ratio (LTV)", min_value=0.0, max_value=100.0, step=0.1, value=80.0)
+
+# Categorical inputs
 education = st.sidebar.selectbox("Education", ["High School", "Bachelor", "Master", "PhD"])
 employment_type = st.sidebar.selectbox("Employment Type", ["Salaried", "Self-Employed", "Unemployed", "Other"])
 marital_status = st.sidebar.selectbox("Marital Status", ["Single", "Married", "Divorced"])
@@ -52,11 +54,9 @@ def load_pipeline_safe(model_path):
         return None, None
     try:
         pipeline = joblib.load(model_path)
-        # Only get expected columns if pipeline has a preprocessor
+        expected_cols = None
         if hasattr(pipeline, "named_steps") and "preprocessor" in pipeline.named_steps:
             expected_cols = pipeline.named_steps["preprocessor"].get_feature_names_out()
-        else:
-            expected_cols = None
         return pipeline, expected_cols
     except Exception as e:
         st.error(f"⚠️ Failed to load model: {e}")
@@ -73,18 +73,20 @@ if st.button("🔮 Predict"):
     if pipeline is None:
         st.error(f"⚠️ Model file not found or failed to load: {model_path}")
     else:
-        # Prepare input DataFrame
+        # Prepare input DataFrame with **exact model column names**
         input_dict = {
-            "LoanID": loan_id,
-            "Age": age,
-            "Income": income,
-            "LoanAmount": loan_amount,
-            "CreditScore": credit_score,
-            "MonthsEmployed": months_employed,
-            "NumCreditLines": num_credit_lines,
-            "InterestRate": interest_rate,
-            "LoanTerm": loan_term,
-            "DTIRatio": dti_ratio,
+            "loan_amount": loan_amount,
+            "income": income,
+            "Credit_Score": credit_score,
+            "age": age,
+            "months_employed": months_employed,
+            "num_credit_lines": num_credit_lines,
+            "rate_of_interest": interest_rate,
+            "term": loan_term,
+            "dtir1": dti_ratio,
+            "property_value": property_value,
+            "Upfront_charges": upfront_charges,
+            "LTV": ltv,
             "Education": education,
             "EmploymentType": employment_type,
             "MaritalStatus": marital_status,
