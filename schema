@@ -1,0 +1,18 @@
+Schema:
+A schema is a structured blueprint that outlines how data is organized, stored, and connected within a system. It defines each field (like name, age, price), its data type (text, number, date, etc.), and the relationships between different entities (for example, linking a customer to their orders). Schemas make complex data easier to understand, manage, and analyze.
+
+Steps to create a schema:
+
+1. Identify key fields: Examine the dataset to find important attributes such as names, IDs, or values.
+2. Assign data types: Specify the format for each field — string, integer, boolean, date, etc.
+3. Define relationships: Establish links between related tables or entities (e.g., customer ID → order records).
+4. Validate and clean: Check for missing, duplicate, or inconsistent data to ensure accuracy and reliability.
+
+Data profiling tools:
+Data profiling tools examine datasets to assess their quality, structure, and content. They uncover anomalies, inconsistencies, and hidden relationships within data. These tools play a key role in maintaining data integrity, improving database design, and supporting informed decision-making.
+
+Main functions:
+
+Structure analysis: Examines how data is organized (tables, columns, formats).
+Content analysis: Reviews actual values to detect patterns, errors, or outliers.
+Relationship discovery: Identifies links and dependencies between data elements or tables.
