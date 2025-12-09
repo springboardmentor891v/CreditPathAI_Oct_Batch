@@ -17,10 +17,7 @@ from sklearn.neural_network import MLPClassifier
 import joblib
 
 # 1. Load and merge data
-borrowers = pd.read_csv(r"E:\Loan_prediction_infosys\CreditPathAI_Oct_Batch\Borrower.txt", sep='\t')
-loans = pd.read_csv(r"E:\Loan_prediction_infosys\CreditPathAI_Oct_Batch\Loan.txt", sep='\t')
-df = pd.merge(borrowers, loans, on='memberId')
-
+df = pd.read_csv("Loan_default")
 # 2. Create Default target
 print(df['loanStatus'].value_counts())
 df['Default'] = df['loanStatus'].apply(lambda x: 1 if x in ['Default', 'Charged Off'] else 0)
