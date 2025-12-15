@@ -1,0 +1,11 @@
+# Ignore trained ML models
+*.pkl
+*.csv
+
+# Ignore Python cache
+__pycache__/
+.ipynb_checkpoints/
+
+# Ignore nested repos / folders
+CreditPathAI_Oct_Batch/
+train_and_/
